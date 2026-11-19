@@ -316,7 +316,7 @@ const frameOpen = new Set();  // 開いている枠組みの表示（場所|枠�
 let prefs = { sec: { purpose: true, examples: true }, panel: false };
 const canFile = ('showSaveFilePicker' in window) && ('showOpenFilePicker' in window);
 const finePointer = window.matchMedia && matchMedia('(pointer:fine)').matches;
-try { const p = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (p && p.sec) Object.assign(prefs.sec, p.sec); if (p && p.panel === true) prefs.panel = true; } catch (e) {}
+try { const p = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (p && p.sec) Object.assign(prefs.sec, p.sec); if (p && p.panel === true) prefs.panel = true; if (p && typeof p.ronshoUrl === 'string') prefs.ronshoUrl = p.ronshoUrl; } catch (e) {}
 const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} };
 
 /* ---------- データ ---------- */
@@ -335,7 +335,9 @@ function normalize(d) {
       mode: (n.mode === 'or' || n.mode === 'weigh') ? n.mode : 'and', kids: [], mt: Number.isFinite(n.mt) ? n.mt : 0 };
     if (n.home === true) out.nodes[id].home = true;
     if (n.inbox === true) out.nodes[id].inbox = true;
-    ['tag', 'fld', 'src', 'sid', 'ssrc', 'prev', 'ptarget'].forEach(k => { if (typeof n[k] === 'string' && n[k]) out.nodes[id][k] = n[k]; });
+    if (n.grp === true) out.nodes[id].grp = true;
+    if (Array.isArray(n.psid)) { const ps = n.psid.filter(x => typeof x === 'string' && x).slice(0, 50); if (ps.length) out.nodes[id].psid = ps; }
+    ['tag', 'fld', 'src', 'sid', 'ssrc', 'prev', 'ptarget', 'kind'].forEach(k => { if (typeof n[k] === 'string' && n[k]) out.nodes[id][k] = n[k]; });
   }
   for (const [id, n] of Object.entries(d.nodes)) {
     if (!out.nodes[id] || !Array.isArray(n.kids)) continue;
@@ -927,7 +929,7 @@ const HEAD_ALIAS = {
   id: 'id', ID: 'id', '親': 'parent', parent: 'parent', '親id': 'parent', '名前': 'title', title: 'title',
   '位置づけ': 'role', role: 'role', '組み方': 'mode', mode: 'mode', 'ウェイト': 'weight', weight: 'weight', '優先度': 'tier', tier: 'tier',
   '趣旨': 'purpose', purpose: 'purpose', text: 'purpose', '具体例': 'examples', examples: 'examples', '分野': 'field', field: 'field',
-  'タグ': 'tag', tag: 'tag', '出典': 'ref', ref: 'ref', '枠組み': 'frames', frames: 'frames',
+  'タグ': 'tag', tag: 'tag', group: 'group', order: 'order', '出典': 'ref', ref: 'ref', '枠組み': 'frames', frames: 'frames',
 };
 const NID = (() => { let c = 0; return () => uid() + (c++).toString(36); })();
 
@@ -1008,9 +1010,11 @@ function ingestRows(rows, source) {
     if (source && r._hasId && data.seen[seenKey(r._k)]) { nodeOf[r._k] = null; res.skipped++; return; }
     if (source && r._hasId) data.seen[seenKey(r._k)] = now;
     if (r.tag === '趣旨') { nodeOf[r._k] = false; return; }
-    const nid = NID(), n = newNode(nid, r.title || (r.purpose ? '' : '（無題）'));
+    const nid = NID(), n = newNode(nid, r.title || (r.purpose ? r.purpose.replace(/\s+/g, ' ').slice(0, 30) : '（無題）'));
     n.purpose = r.purpose || ''; n.examples = r.examples || ''; n.mode = modeFrom(r.mode); n.mt = 0;
-    if (r.tag) n.tag = r.tag.slice(0, 20);
+    if (r.tag && !(r.tag === '要件' && r._v2)) n.tag = r.tag.slice(0, 20);
+    if (r.tag) n.kind = r.tag.slice(0, 20);
+    if (r.group === 'true') { n.grp = true; if (!n.title) n.title = '（括弧）'; }
     if (r.field) n.fld = r.field.slice(0, 120);
     if (r.ref) n.src = r.ref.slice(0, 200);
     if (source && r._hasId) { n.sid = r.id.slice(0, 120); n.ssrc = source.slice(0, 60); }
@@ -1020,12 +1024,12 @@ function ingestRows(rows, source) {
   rows.forEach(r => { const id = nodeOf[r._k]; if (id && r.title) (byTitle[r.title] = byTitle[r.title] || new Set()).add(id); });
   const resolve = p => { if (!p) return null; if (nodeOf[p]) return nodeOf[p]; const s = byTitle[p]; return s && s.size === 1 ? [...s][0] : null; };
   const hasParent = new Set();
-  rows.forEach(r => {
+  rows.slice().sort((a, b) => (parseFloat(a.order) || 0) - (parseFloat(b.order) || 0)).forEach(r => {
     const cid = nodeOf[r._k], pid = resolve(r.parent);
     if (r.tag === '趣旨') {
       if (nodeOf[r._k] === null) return;
       const text = r.purpose || r.title; if (!text) return;
-      if (pid) { const pn = data.nodes[pid]; pn.purpose = pn.purpose ? pn.purpose + '\n【趣旨】' + text : text; }
+      if (pid) { const pn = data.nodes[pid]; pn.purpose = pn.purpose ? pn.purpose + '\n【趣旨】' + text : text; if (source && r._hasId) pn.psid = (pn.psid || []).concat(r.id).slice(0, 50); }
       else { const nid = NID(), n = newNode(nid, text.slice(0, 30)); n.purpose = text; n.tag = '趣旨'; n.mt = 0; n.inbox = true; data.nodes[nid] = n; res.added++; res.tops++; res.notes.push('親が見つからない趣旨の行を、単独で置き場に入れました'); }
       return;
     }
@@ -1064,6 +1068,7 @@ function ingestText(text, name) {
     if (j && j.nodes && j.roots) throw new Error('これは、このアプリの保存データ（全体）です。「⬆ 読み込み」を使ってください。');
     const arr = Array.isArray(j) ? j : (j.rows || j.items || []);
     source = String((j && j.source) || 'handoff'); rows = arr.map(canonRow);
+    if (j && Number(j.version) >= 2) rows.forEach(r => { r._v2 = true; });
   } else rows = rowsFromCSV(parseCSV(t));
   return ingestRows(rows, source);
 }
@@ -1184,7 +1189,9 @@ function buildPlacement() {
     if (!n.sid || n.inbox) return;
     const p = findPath(n.id); if (!p) return;
     const pn = p.length > 1 ? data.nodes[p[p.length - 2]] : null;
-    rows.push({ id: n.sid, source: n.ssrc || '', field: fieldOfRoot(p[0]), tree: data.nodes[p[0]].title || '', path: p.map(i => data.nodes[i].title || '（無題）').join(' › '), parent: pn && pn.sid ? pn.sid : '' });
+    const row = { id: n.sid, source: n.ssrc || '', kind: n.grp ? '括弧' : (n.kind || n.tag || '要件'), field: fieldOfRoot(p[0]), tree: data.nodes[p[0]].title || '', path: p.map(i => data.nodes[i].title || '（無題）').join(' › '), parent: pn && pn.sid ? pn.sid : '' };
+    rows.push(row);
+    (n.psid || []).forEach(pid => rows.push(Object.assign({}, row, { id: pid, kind: '趣旨', parent: n.sid })));
   });
   return { format: 'decisions-placement', version: 1, source: 'tree', exportedAt: new Date().toISOString(), rows };
 }
@@ -1290,7 +1297,8 @@ ${CSV_SPEC}
 ・このアプリの「📥 暫定の置き場」で「受け取りファイルを選ぶ」を押して、そのファイルを選ぶと、届いたものが置き場に入ります（画面に戻ったときに、新しい分のみ自動で取り込まれます。同じものを二重に取り込むことはありません）。
 
 ・向こうで直して送り直したブロックは、置き場に「更新版」として届きます。ブロックを選ぶと右の欄に「前の版と入れ替える」が出て、同じ場所に入れ替わります（前の版にこちらで書き足した内容は移りません）。
-・置き場所が決まったブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（分野名・ツリー上の道すじ）を書いたファイル（DB配置.json）にできます。向こうのページが読むためのものです。
+・向こうの「判断」「要件」「括弧（グループ）」「趣旨」にも対応しています（括弧は「括弧」の印が付いたブロックになります）。向こうのカードに、データベースのブロックから戻るには、ブロックを選んで右の欄の「論証フローチャートで開く」を押します（最初の1回だけ、向こうのページのアドレスを聞かれます）。向こうから、このツリーの該当ブロックを開くリンク（decisions.html#node=…）も使えます。
+・置き場所が決まったブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（分野名・ツリー上の道すじ。判断・要件・括弧・趣旨のそれぞれのid）を書いたファイル（DB配置.json）にできます。向こうのページが読むためのものです。
 
 ■ 主な操作
 ・ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（ダブルクリック、F2）＝編集。Esc＝編集を終える。
@@ -1509,7 +1517,7 @@ function pasteSel() {
     const map = {}; Object.keys(clip.nodes).forEach(i => { map[i] = uid(); });
     Object.keys(clip.nodes).forEach(i => {
       const o = JSON.parse(JSON.stringify(clip.nodes[i])), nid = map[i];
-      o.id = nid; delete o.mt; delete o.home;
+      o.id = nid; delete o.mt; delete o.home; delete o.sid; delete o.ssrc; delete o.psid; delete o.prev; delete o.ptarget; delete o.inbox;
       o.kids = o.kids.filter(k => map[k.id]).map(k => Object.assign({}, k, { id: map[k.id] }));
       o.frames = (o.frames || []).map(f => map[f] || f).filter(f => data.nodes[f] || Object.values(map).includes(f));
       if (o.maps) { const m2 = {}; Object.keys(o.maps).forEach(k => { const [a, b] = k.split('>'); m2[(map[a] || a) + '>' + (map[b] || b)] = map[o.maps[k]] || o.maps[k]; }); o.maps = m2; }
@@ -1558,6 +1566,35 @@ function infoBlock(key, tag, label, text, cls) {
   const d = el('div', 'info' + (cls ? ' ' + cls : '')); d.appendChild(el('span', 'il', label)); d.appendChild(document.createTextNode(text));
   d.onclick = e => e.stopPropagation(); return d;
 }
+/* ---------- 別ページ（論証フローチャート）とのリンク ---------- */
+const baseSid = x => String(x || '').replace(/-v\d+$/, '');
+function nodeBySid(id) {   // 向こうの id から、こちらのブロックを探す（更新版・趣旨の id にも対応）
+  if (!id) return null;
+  const all = Object.values(data.nodes), cands = [id, id.replace(/p\d+$/, '')];
+  for (const c of cands) {
+    let n = all.find(x => x.sid === c) || all.find(x => x.psid && x.psid.includes(c)) || data.nodes[c];
+    if (n) return n;
+    n = all.find(x => x.sid && baseSid(x.sid) === baseSid(c)); if (n) return n;
+  }
+  return null;
+}
+function applyHash(final) {
+  const m = /[#&]node=([^&]+)/.exec(location.hash || ''); if (!m) return;
+  const id = decodeURIComponent(m[1]), n = nodeBySid(id);
+  if (n) { reveal(n.id); history.replaceState(null, '', location.pathname + location.search); }
+  else if (final) showBanner('リンク先のブロック「' + id + '」は、まだこのツリーに取り込まれていません。向こうで「送信」したあと、「受け取りファイル」から取り込んでください。', 'err');
+}
+function openInRonsho(sid) {
+  let base = prefs.ronshoUrl || '';
+  if (!base) {
+    base = (window.prompt('論証フローチャートのページのアドレスを、もう一つのタブからコピーして貼り付けてください（最初の1回だけ）。\n例：https://gitwallaby.github.io/…/ronsho.html', '') || '').trim();
+    if (!/^https?:\/\//.test(base)) { if (base) showBanner('アドレスの形が違います（https:// で始まるものを貼ってください）。', 'err'); return; }
+    prefs.ronshoUrl = base.split('#')[0]; savePrefs();
+  }
+  window.open(prefs.ronshoUrl + '#fc=' + encodeURIComponent(sid), '_blank');
+}
+window.addEventListener('hashchange', () => applyHash(true));
+
 /* ---------- ドラッグ＆ドロップで位置を変える ---------- */
 let dragSrc = null;   // { key, path }
 function dropZone(e, row, tpath) {   // 行のどこに落とすか：上端＝この前／下端＝この後／中央＝この中（末尾の子）
@@ -1674,6 +1711,7 @@ function nodeLi(id, link, path, bi) {
     if (cyc) t.appendChild(document.createTextNode('↻ '));
     hl(t, n.title || '（無題）', searchQ); row.appendChild(t);
   }
+  if (n.grp) row.appendChild(el('span', 'badge or', '括弧'));
   if (n.tag) row.appendChild(el('span', 'badge ' + (n.tag === '趣旨' ? 'or' : n.tag === '規範' ? 'wg' : 'req'), n.tag));
   if (n.fld) row.appendChild(el('span', 'cnt', n.fld));
   if (n.src) row.title = '出どころ：' + n.src;
@@ -2025,6 +2063,11 @@ function renderPanel() {
   const path = selKey.split('>'), id = selId(), n = data.nodes[id];
   P.appendChild(panelClose());
   P.appendChild(el('h2', null, '選択中：' + (n.title || '（無題）')));
+  if (n.sid && n.ssrc === 'flowchart') {
+    const lb = el('button', 'sm', '論証フローチャートで開く ↗'); lb.style.margin = '4px 0 8px';
+    lb.title = '向こうのページで、このブロックの元のカードを開く'; lb.onclick = () => openInRonsho(n.sid);
+    P.appendChild(lb);
+  }
   const isMap = view.type === 'map' && !n.inbox && !(data.nodes[path[0]] && data.nodes[path[0]].inbox);
   if (path.length === 1 && n.inbox) {
     P.appendChild(el('div', 'sec', '置き場所を決める（暫定の置き場から出す）'));
@@ -2328,10 +2371,10 @@ if (!canFile) { $('#btnOpen').hidden = true; $('#btnSaveAs').hidden = true; $('#
   try { const s = localStorage.getItem(LS_KEY); if (s) { data = normalize(JSON.parse(s)); loaded = true; } } catch (e) {}
   if (!loaded) { data = sampleData(); showSampleNote = true; }
   ensureHome(); initView(); resetSnap(); resetHistory(); applyPanel();
-  render();
+  render(); applyHash(false);
   if (!canFile) {
     showBanner('このブラウザではファイルへの自動保存は使えません（PCのChrome・Edgeで開いてください）。今はブラウザ内に保存され、「書き出し」でファイルにできます。');
-    return;
+    applyHash(true); return;
   }
   try { inboxHandle = (await idbGet('inboxHandle')) || null; } catch (e) {}
   try { placeHandle = (await idbGet('placeHandle')) || null; } catch (e) {}
@@ -2355,6 +2398,7 @@ if (!canFile) { $('#btnOpen').hidden = true; $('#btnSaveAs').hidden = true; $('#
       }
     }
   } catch (e) {}
+  applyHash(true);
 })();
 })();
 </script>
