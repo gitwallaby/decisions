@@ -96,6 +96,11 @@ li.ghead.wg span{background:var(--wgbg);color:var(--wg)}
 .row{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:36px;padding:2px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
 .row:hover{background:rgba(127,127,127,.12)}
 .row.sel{background:var(--sel);border-color:var(--acc)}
+.row.dz-into{outline:2px solid var(--acc);outline-offset:-2px;background:var(--reqbg)}
+.row.dz-before{box-shadow:inset 0 3px 0 var(--acc)}
+.row.dz-after{box-shadow:inset 0 -3px 0 var(--acc)}
+.row.dragging{opacity:.45}
+#dndHint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:50;display:none;pointer-events:none;max-width:90vw}
 .ttl{font-weight:600}
 .ttl.blank{color:var(--sub);font-weight:400}
 .row.rootrow .ttl,.row.rootrow .tin{font-size:16px}
@@ -230,6 +235,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <p><b>操作</b>：ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（またはダブルクリック、<kbd>F2</kbd>）＝編集モード（名前の編集と、趣旨・具体例の入力欄が開く）。「趣旨」「具体例」の小さなボタンで、内容の表示・非表示を切り替えます。<kbd>Esc</kbd>で編集モードを終える。下位要件を閉じるには、線の途中の「−」。ブロックの右の「↳3」は、下に3つ要素があるという印です。</p>
   <p><b>資料の取り込み（CSV）</b>：「⇅ CSV・AI」から、AIに渡す指示文をコピーし、Vflatの文字起こしやNotebookLMのまとめと一緒にAIに渡すと、取り込み用のCSVを作ってもらえます。取り込んだものは、「📥 暫定の置き場」に入り、置き場所（分野・どのブロックの下か）を決めます。書き方の詳しい説明は、「使い方.txt」にあります。</p>
   <p><b>分野ツリー（ホーム画面）</b>：左上の「🏠 分野ツリー」が、分野の一覧（地図）です。分野名をクリックすると、その分野のツリーだけが表示されます。分野の追加・並べ替えは、分野ツリーの中で、ふつうのブロックと同じように行えます。分野名のブロックに「開くツリー」を設定すると、ジャンプ先になります（右の「◀ 組み方」欄）。</p>
+  <p><b>ドラッグで位置を変える</b>：ブロックをつかんで、別のブロックの上端（前に置く）・下端（後ろに置く）・中央（中に入れる）に落とします。そのままだと下のブロックごと動き、<kbd>Shift</kbd>を押しながら落とすと、そのブロックだけが動いて、下のブロックはひとつ上の階層に上がります。分野の最上位のブロックは動かせません。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で戻せます。</p>
   <p><b>コピー・切り取り・貼り付け／取り消し</b>：ブロックを選んで <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>X</kbd>／<kbd>V</kbd>（貼り付けは、選んだブロックの下に入ります）。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で元に戻し、<kbd>Ctrl</kbd>+<kbd>Y</kbd>でやり直し。キーは「⌨ キー設定」で変えられます。</p>
   <p><b>ブロックを作る</b>：<kbd>Enter</kbd>＝下、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝上、<kbd>Tab</kbd>＝右（一階層下）、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝左（一階層上）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
   <p><b>要件の組み方</b>：「すべて必要」は青の太い線で束ねて①②③。「どれか1つ」は橙色でA・B・C。「総合考慮」は紫色で、ウェイトと優先度（一次的・副次的・補充的）を書けます。</p>
@@ -237,6 +243,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <p><button id="btnClear" class="sm danger">データを全部消して白紙にする</button> <span>（取り消せません。先に「書き出し」をおすすめします）</span></p>
 </details>
 <div id="banner"></div>
+<div id="dndHint"></div>
 <div class="main">
   <section class="pane">
     <div class="toolbar">
@@ -1288,6 +1295,7 @@ ${CSV_SPEC}
 ■ 主な操作
 ・ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（ダブルクリック、F2）＝編集。Esc＝編集を終える。
 ・Enter＝下にブロックを作る／Shift+Enter＝上／Tab＝下の階層／Shift+Tab＝上の階層。
+・ドラッグ＝位置を変える（相手の上端＝前、下端＝後ろ、中央＝中に入れる）。そのままだと下のブロックごと、Shiftを押しながらだと、そのブロックだけが動き、下のブロックはひとつ上の階層に上がる。
 ・Ctrl+C／X／V＝コピー・切り取り・貼り付け。Ctrl+Z／Y＝元に戻す・やり直す。Ctrl+F＝検索。
 ・キーは「⌨ キー設定」で変えられます。
 `;
@@ -1550,6 +1558,88 @@ function infoBlock(key, tag, label, text, cls) {
   const d = el('div', 'info' + (cls ? ' ' + cls : '')); d.appendChild(el('span', 'il', label)); d.appendChild(document.createTextNode(text));
   d.onclick = e => e.stopPropagation(); return d;
 }
+/* ---------- ドラッグ＆ドロップで位置を変える ---------- */
+let dragSrc = null;   // { key, path }
+function dropZone(e, row, tpath) {   // 行のどこに落とすか：上端＝この前／下端＝この後／中央＝この中（末尾の子）
+  const r = row.getBoundingClientRect(), y = (e.clientY - r.top) / Math.max(1, r.height);
+  const tn = data.nodes[tpath[tpath.length - 1]];
+  if (tpath.length === 1 || (tn && (tn.home || tn.inbox))) return 'into';   // 最上位の並びは変えない
+  return y < 0.28 ? 'before' : y > 0.72 ? 'after' : 'into';
+}
+function canDrop(srcPath, tpath, zone, shift) {
+  const sid = srcPath[srcPath.length - 1], tid = tpath[tpath.length - 1];
+  if (sid === tid) return false;
+  if (tpath.includes(sid) && !shift) return false;           // 自分の中には入れない
+  const newParent = zone === 'into' ? tid : tpath[tpath.length - 2];
+  if (!newParent || !data.nodes[newParent]) return false;
+  if (!shift && reaches(sid, newParent)) return false;
+  if (shift && newParent === sid) return false;
+  return true;
+}
+function moveBlock(srcPath, tpath, zone, shift) {
+  const sid = srcPath[srcPath.length - 1], tid = tpath[tpath.length - 1];
+  const oldPk = srcPath[srcPath.length - 2], oldP = data.nodes[oldPk];
+  const link = Object.assign({}, linkOf(srcPath)), src = data.nodes[sid];
+  const newPid = zone === 'into' ? tid : tpath[tpath.length - 2];
+  const oldKey = srcPath.join('>');
+  commitHistory();   // 直前までの編集と、ひとまとめにしない（1回の移動＝1回の「戻す」）
+  // 1. 元の場所から外す（Shift：下のブロックを、ひとつ上の階層に上げる）
+  const i0 = oldP.kids.findIndex(k => k.id === sid);
+  let lifted = [];
+  if (shift) {
+    lifted = src.kids.filter(k => data.nodes[k.id] && !oldP.kids.some(x => x.id === k.id)).map(k => Object.assign({}, k));
+    oldP.kids.splice(i0, 1, ...lifted); src.kids = [];
+  } else oldP.kids.splice(i0, 1);
+  // 2. 新しい場所に入れる
+  const np = data.nodes[newPid];
+  const ex = np.kids.findIndex(k => k.id === sid); if (ex >= 0) np.kids.splice(ex, 1);   // 同じ親の中の並べ替え
+  const nl = { id: sid, role: link.role || '?', w: link.w || '', tier: link.tier || '' };
+  if (zone === 'into') np.kids.push(nl);
+  else { const j = np.kids.findIndex(k => k.id === tid); np.kids.splice(zone === 'before' ? j : j + 1, 0, nl); }
+  // 3. 表示の状態：開いていた場所を、新しい道すじに写す
+  const newPath = zone === 'into' ? tpath.concat(sid) : tpath.slice(0, -1).concat(sid), nk = newPath.join('>');
+  if (!shift) {
+    const add = [];
+    expanded.forEach(k => { if (k === oldKey || k.startsWith(oldKey + '>')) add.push(nk + k.slice(oldKey.length)); });
+    add.forEach(k => expanded.add(k));
+  }
+  if (zone === 'into') expanded.add(tpath.join('>'));
+  selKey = nk; editing = false; changed(); commitHistory(); render();
+  const s = document.querySelector('#tree .row.sel'); if (s) s.scrollIntoView({ block: 'nearest' });
+  showBanner(shift ? 'このブロックだけを移しました（下のブロックは、ひとつ上の階層に上がりました）。' : 'ブロックを、下のブロックごと移しました。');
+}
+function dndHint(t) { const h = $('#dndHint'); h.textContent = t || ''; h.style.display = t ? 'block' : 'none'; }
+function clearDz() { document.querySelectorAll('.row.dz-into,.row.dz-before,.row.dz-after').forEach(r => r.classList.remove('dz-into', 'dz-before', 'dz-after')); }
+function wireDnd(row, myPath, cyc, isEdit) {
+  if (cyc) return;
+  if (myPath.length > 1 && !isEdit) {   // 最上位のブロック（分野・置き場）は、動かさない
+    row.draggable = true;
+    row.addEventListener('dragstart', e => {
+      dragSrc = { key: myPath.join('>'), path: myPath.slice() };
+      e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragSrc.key);
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', () => { dragSrc = null; row.classList.remove('dragging'); clearDz(); dndHint(''); });
+  }
+  row.addEventListener('dragover', e => {
+    if (!dragSrc) return;
+    const zone = dropZone(e, row, myPath), ok = canDrop(dragSrc.path, myPath, zone, e.shiftKey);
+    clearDz();
+    if (!ok) { dndHint('ここには移せません'); return; }
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    row.classList.add('dz-' + zone);
+    dndHint((e.shiftKey ? 'Shift：このブロックだけを移す（下のブロックは、ひとつ上の階層に上がる）' : '下のブロックごと移す（Shiftを押しながらで、このブロックだけ）') + (zone === 'into' ? '　→ この中に入れる' : zone === 'before' ? '　→ この前に置く' : '　→ この後に置く'));
+  });
+  row.addEventListener('dragleave', e => { if (!row.contains(e.relatedTarget)) row.classList.remove('dz-into', 'dz-before', 'dz-after'); });
+  row.addEventListener('drop', e => {
+    if (!dragSrc) return;
+    e.preventDefault();
+    const zone = dropZone(e, row, myPath), src = dragSrc.path;
+    clearDz(); dndHint('');
+    if (canDrop(src, myPath, zone, e.shiftKey)) moveBlock(src, myPath, zone, e.shiftKey);
+    dragSrc = null;
+  });
+}
 function nodeLi(id, link, path, bi) {
   const n = data.nodes[id];
   const topN = data.nodes[path[0] || id];
@@ -1613,6 +1703,7 @@ function nodeLi(id, link, path, bi) {
     }
     if (!editing) { editing = true; wantFocus = true; if (hasKids) expanded.add(key); render(); }   // 2回目：編集モード
   };
+  wireDnd(row, myPath, cyc, isEdit);
   row.ondblclick = () => {
     if (cyc || jumpOk) return;
     selKey = key; editing = true; wantFocus = true; if (hasKids) expanded.add(key); render();
