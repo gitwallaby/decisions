@@ -215,7 +215,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー</h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 11/19 夜（分野の流れ）</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnSamples" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button>
@@ -233,7 +233,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <summary>使い方・データの扱い</summary>
   <p><b>データの扱い</b>：このページ（アプリ本体・GitHub）には、書いた内容は一切入りません。内容は、別のデータファイル（あなたのGoogleドライブなど）にだけ保存されます。内容は「①このブラウザの中（自動保存）」と「②あなたが選んだデータファイル」にだけ保存され、ネットには送られません。「💾 保存先ファイルを作る」でGoogleドライブなどにファイルを作ると、以後は編集のたびに自動でそのファイルと同期します（PCのChrome・Edge）。<b>同期のルール</b>：ブロックごとに、編集時刻が新しい方を採用します（Ankiと同じ考え方）。別の端末で更新したときは、画面に戻った時や「🔄 同期」で取り込みます。新しい端末では、最初に「📂 ファイルを開く」でデータファイルを選んでください（サンプルが混ざるのを防ぐため）。</p>
   <p><b>操作</b>：ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（またはダブルクリック、<kbd>F2</kbd>）＝編集モード（名前の編集と、趣旨・具体例の入力欄が開く）。「趣旨」「具体例」の小さなボタンで、内容の表示・非表示を切り替えます。<kbd>Esc</kbd>で編集モードを終える。下位要件を閉じるには、線の途中の「−」。ブロックの右の「↳3」は、下に3つ要素があるという印です。</p>
-  <p><b>資料の取り込み（CSV）</b>：「⇅ CSV・AI」から、AIに渡す指示文をコピーし、Vflatの文字起こしやNotebookLMのまとめと一緒にAIに渡すと、取り込み用のCSVを作ってもらえます。取り込んだものは、「📥 暫定の置き場」に入り、置き場所（分野・どのブロックの下か）を決めます。書き方の詳しい説明は、「使い方.txt」にあります。</p>
+  <p><b>資料の取り込み（CSV）</b>：「⇅ CSV・AI」から、AIに渡す指示文をコピーし、Vflatの文字起こしやNotebookLMのまとめと一緒にAIに渡すと、取り込み用のCSVを作ってもらえます。取り込んだものは「📥 暫定の置き場（未分類）」に入ります。まず「分野に入れる」で分野を選び、次にその分野のツリーを開いて「置き場所を決める」で、どのブロックの下に置くかを決めます。書き方の詳しい説明は、「使い方.txt」にあります。</p>
   <p><b>分野ツリー（ホーム画面）</b>：左上の「🏠 分野ツリー」が、分野の一覧（地図）です。分野名をクリックすると、その分野のツリーだけが表示されます。分野の追加・並べ替えは、分野ツリーの中で、ふつうのブロックと同じように行えます。分野名のブロックに「開くツリー」を設定すると、ジャンプ先になります（右の「◀ 組み方」欄）。</p>
   <p><b>ドラッグで位置を変える</b>：ブロックをつかんで、別のブロックの上端（前に置く）・下端（後ろに置く）・中央（中に入れる）に落とします。そのままだと下のブロックごと動き、<kbd>Shift</kbd>を押しながら落とすと、そのブロックだけが動いて、下のブロックはひとつ上の階層に上がります。分野の最上位のブロックは動かせません。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で戻せます。</p>
   <p><b>コピー・切り取り・貼り付け／取り消し</b>：ブロックを選んで <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>X</kbd>／<kbd>V</kbd>（貼り付けは、選んだブロックの下に入ります）。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で元に戻し、<kbd>Ctrl</kbd>+<kbd>Y</kbd>でやり直し。キーは「⌨ キー設定」で変えられます。</p>
@@ -446,6 +446,16 @@ const linkOf = path => (path.length > 1 ? data.nodes[path[path.length - 2]].kids
 const isEmptyNode = n => !n.title && !n.purpose && !n.examples && n.kids.length === 0 && !(n.frames || []).length && !n.jump;
 const homeIds = () => Object.values(data.nodes).filter(n => n.home).map(n => n.id);
 const inboxIds = () => Object.values(data.nodes).filter(n => n.inbox).map(n => n.id);
+/* 分野の流れ：未分類（ifldなし）→ 分野のみ（ifld＝分野ツリー内の分野ブロックのid）→ 配置済み */
+function fieldStrOf(mid) { const p = findPath(mid); return p ? p.slice(1).map(i => data.nodes[i].title || '').join('/') : ''; }
+function ifldNode(n) {   // このまとまりを入れてある分野（分野ツリーの中のブロック）。無効なら null
+  const f = n && n.ifld && data.nodes[n.ifld]; if (!f) return null;
+  const p = findPath(f.id); return p && p.length > 1 && data.nodes[p[0]] && data.nodes[p[0]].home ? f : null;
+}
+const fieldRootOf = f => (f && f.jump && data.nodes[f.jump] ? f.jump : null);
+const unsortedIds = () => inboxIds().filter(id => !ifldNode(data.nodes[id]));
+const fieldPendingIds = rootId => inboxIds().filter(id => { const f = ifldNode(data.nodes[id]); return f && fieldRootOf(f) === rootId; });
+const noTreePendingIds = () => inboxIds().filter(id => { const f = ifldNode(data.nodes[id]); return f && !fieldRootOf(f); });
 const isTop = id => data.roots.includes(id) || !!(data.nodes[id] && (data.nodes[id].home || data.nodes[id].inbox));
 const frameUsers = id => Object.values(data.nodes).filter(n => (n.frames || []).includes(id));
 const dropNodeLinks = ids => Object.values(data.nodes).forEach(x => {
@@ -779,6 +789,7 @@ function undo() { commitHistory(); if (!undoStack.length) return; redoStack.push
 function redo() { commitHistory(); if (!redoStack.length) return; undoStack.push(stateStr()); applyHist(redoStack.pop()); }
 
 function changed() {
+  clearTimeout(placeTimer); placeTimer = setTimeout(() => { try { autoPlacement(); } catch (e) {} }, 2500);
   if (!restoring) { if (pendingBase === null) pendingBase = lastState; clearTimeout(histTimer); histTimer = setTimeout(commitHistory, 700); updateHistBtns(); }
   showSampleNote = false;
   clearTimeout(lsTimer);
@@ -1051,7 +1062,7 @@ function ingestRows(rows, source) {
   rows.forEach(r => {   // 向こうで直して送り直したもの（-v2…）は、前の版を覚えておく。親が既に取り込み済みなら、その親も覚えておく
     const cid = nodeOf[r._k]; if (!cid || hasParent.has(cid) || !source || !r._hasId) return;
     const me = data.nodes[cid];
-    const olds = Object.values(data.nodes).filter(x => x.ssrc === source && x.sid && x.sid !== r.id && baseId(x.sid) === baseId(r.id) && !fresh.has(x.id) && !x.inbox);
+    const olds = Object.values(data.nodes).filter(x => x.ssrc === source && x.sid && x.sid !== r.id && baseId(x.sid) === baseId(r.id) && !fresh.has(x.id));
     if (olds.length) { me.prev = olds[olds.length - 1].id; res.notes.push('「' + (me.title || '無題') + '」は、以前に取り込んだものの更新版です'); }
     else if (r.parent) { const ps = known(r.parent, fresh).filter(x => !x.inbox); if (ps.length) me.ptarget = ps[0].id; }
   });
@@ -1075,7 +1086,7 @@ function ingestText(text, name) {
 function afterIngest(res, label) {
   if (res.added || res.skipped) { changed(); view = { type: 'map' }; selKey = null; editing = false; render(); }
   const msg = res.added
-    ? label + '：' + res.added + '件を「暫定の置き場」に入れました。置き場所を決めてください。' + (res.skipped ? '（受け取り済み ' + res.skipped + '件は除きました）' : '')
+    ? label + '：' + res.added + '件を「暫定の置き場（未分類）」に入れました。「分野に入れる」で分野を決めてください。' + (res.skipped ? '（受け取り済み ' + res.skipped + '件は除きました）' : '')
     : (res.skipped ? label + '：新しいものはありませんでした（受け取り済み ' + res.skipped + '件）。' : label + '：取り込めるものがありませんでした。');
   showBanner(msg + (res.notes.length ? ' ※' + [...new Set(res.notes)].join('／') : ''), res.added || res.skipped ? 'info' : 'err');
 }
@@ -1114,29 +1125,40 @@ async function autoInbox() {
 }
 
 /* 置き場所を決める */
-function registerFieldPath(rootId, fieldStr) {   // 「法律/民法」のような分野名で、分野ツリーに登録（無い見出しは作る）
+function ensureFieldPath(fieldStr) {   // 「法律/民法」のような分野名の最後のブロックを返す（同じ名前があれば使い、無ければ見出しとして作る）
   let hid = homeIds()[0];
   if (!hid) { hid = uid(); const h = newNode(hid, '分野ツリー（ホーム）'); h.home = true; data.nodes[hid] = h; }
   data.mapInit = true;
   const parts = (fieldStr || '').split('/').map(x => x.trim()).filter(Boolean);
-  if (!parts.length) parts.push(data.nodes[rootId].title || '新しい分野');
   let cur = hid;
-  parts.forEach((name, i) => {
-    const last = i === parts.length - 1, parent = data.nodes[cur];
-    let kid = parent.kids.map(k => data.nodes[k.id]).find(c => c && c.title === name && (!last || !c.jump));
+  parts.forEach(name => {
+    const parent = data.nodes[cur];
+    let kid = parent.kids.map(k => data.nodes[k.id]).find(c => c && c.title === name);
     if (!kid) { kid = newNode(NID(), name); data.nodes[kid.id] = kid; parent.kids.push({ id: kid.id, role: '?', w: '', tier: '' }); }
-    if (last) kid.jump = rootId;
     cur = kid.id;
   });
+  return cur === hid ? null : cur;
 }
-function clearInboxMark(n) { delete n.inbox; delete n.tag; delete n.fld; delete n.prev; delete n.ptarget; }
-function placeAsField(id, fieldStr) {
-  const n = data.nodes[id]; if (!n) return;
+function fieldList() {   // いま、開くツリーがある分野：[{id, label}]
+  const out = [];
+  homeIds().forEach(h => subtreeIds(h).forEach(i => { if (i !== h && fieldRootOf(data.nodes[i])) out.push({ id: i, label: fieldStrOf(i) }); }));
+  return out;
+}
+function clearInboxMark(n) { delete n.inbox; delete n.ifld; delete n.tag; delete n.fld; delete n.prev; delete n.ptarget; }
+function assignField(id, mid) {   // ② 分野に入れる：その分野の暫定の置き場に移る（分野ツリーの中には、まだつなげない）
+  const n = data.nodes[id], f = data.nodes[mid]; if (!n || !f) return;
+  n.ifld = mid; changed(); render();
+  const r = fieldRootOf(f), label = fieldStrOf(mid);
+  showBanner('「' + label + '」の暫定の置き場に入れました。' + (r ? '次は、その分野のツリーを開いて、置き場所を決めます。' : 'この分野のツリーはまだ無いので、ホームの「分野だけ決めたもの」から、最上位のツリーにできます。'), 'info', r ? [['その分野を開く', () => openField(r)]] : []);
+}
+function placeAsTop(id, mid) {   // ③ その分野の最上位のツリーにする（その分野に、まだツリーが無いとき）
+  const n = data.nodes[id], f = data.nodes[mid]; if (!n || !f) return;
+  if (fieldRootOf(f)) { showBanner('この分野には、すでにツリーがあります。そのツリーの中に置いてください。', 'err'); return; }
   clearInboxMark(n);
   if (!data.roots.includes(id)) data.roots.push(id);
-  registerFieldPath(id, fieldStr);
+  f.jump = id; data.mapInit = true;
   changed(); openField(id);
-  showBanner('分野ツリーに登録しました。');
+  showBanner('「' + fieldStrOf(mid) + '」の最上位のツリーにしました。');
 }
 function placeUnder(id, targetId, role) {
   const n = data.nodes[id], t = data.nodes[targetId]; if (!n || !t) return;
@@ -1151,7 +1173,8 @@ function replaceVersion(newId, oldId) {   // 更新版を、前の版と同じ�
   if (!confirm('「' + (old.title || '無題') + '」の前の版を、この新しい版に入れ替えます。\n前の版（とその下の、向こうから届いたブロック）は削除されます。前の版にこちらで書き足した内容は、新しい版に移りません。よろしいですか？')) return;
   const mine = subtreeIds(newId);
   const oldSub = [...subtreeIds(oldId)].filter(i => !mine.has(i));
-  clearInboxMark(nw);
+  if (old.inbox) { delete nw.prev; delete nw.ptarget; if (old.ifld) nw.ifld = old.ifld; }   // 前の版が置き場にあるときは、新しい版も同じ置き場に入る
+  else clearInboxMark(nw);
   Object.values(data.nodes).forEach(x => {
     x.kids.forEach(k => { if (k.id === oldId) k.id = newId; });
     x.kids = x.kids.filter((k, i, a) => a.findIndex(y => y.id === k.id) === i);
@@ -1168,13 +1191,13 @@ function replaceVersion(newId, oldId) {   // 更新版を、前の版と同じ�
   changed(); reveal(newId);
   showBanner('更新版に入れ替えました。');
 }
-function inboxTargets(id, q) {   // 置き先の候補（分野ツリー・置き場の中は除く）
+function inboxTargets(id, q, rootId) {   // 置き先の候補（分野ツリー・置き場の中は除く）
   const lq = q.toLowerCase(), skip = new Set();
   homeIds().forEach(h => subtreeIds(h).forEach(x => skip.add(x)));
   inboxIds().forEach(h => subtreeIds(h).forEach(x => skip.add(x)));
-  const out = [];
+  const out = [], inRoot = rootId ? subtreeIds(rootId) : null;
   Object.values(data.nodes).forEach(x => {
-    if (skip.has(x.id) || !(x.title || '').toLowerCase().includes(lq)) return;
+    if (skip.has(x.id) || (inRoot && !inRoot.has(x.id)) || !(x.title || '').toLowerCase().includes(lq)) return;
     const p = findPath(x.id); if (!p) return;
     out.push({ id: x.id, label: p.map(i => data.nodes[i].title || '無題').join(' › ') });
   });
@@ -1184,34 +1207,45 @@ function inboxTargets(id, q) {   // 置き先の候補（分野ツリー・置�
 /* 配置ファイル：向こうから届いたブロックが、ツリーのどこに置かれたかを書いたファイル（DB配置.json） */
 function buildPlacement() {
   const rows = [];
-  const fieldOfRoot = rid => { const m = mapNodeFor(rid); if (!m) return ''; const p = findPath(m.id) || []; return p.slice(1).map(i => data.nodes[i].title || '').join('/'); };
+  const fieldOfRoot = rid => { const m = mapNodeFor(rid); return m ? fieldStrOf(m.id) : ''; };
   Object.values(data.nodes).forEach(n => {
-    if (!n.sid || n.inbox) return;
+    if (!n.sid) return;
     const p = findPath(n.id); if (!p) return;
-    const pn = p.length > 1 ? data.nodes[p[p.length - 2]] : null;
-    const row = { id: n.sid, source: n.ssrc || '', kind: n.grp ? '括弧' : (n.kind || n.tag || '要件'), field: fieldOfRoot(p[0]), tree: data.nodes[p[0]].title || '', path: p.map(i => data.nodes[i].title || '（無題）').join(' › '), parent: pn && pn.sid ? pn.sid : '' };
+    const top = data.nodes[p[0]], pn = p.length > 1 ? data.nodes[p[p.length - 2]] : null;
+    const base = { id: n.sid, source: n.ssrc || '', kind: n.grp ? '括弧' : (n.kind || n.tag || '要件') };
+    let row;
+    if (top.inbox) {   // まだ置き場にある：未分類は行を出さない／分野のみは field だけ
+      const f = ifldNode(top); if (!f) return;
+      row = Object.assign(base, { stage: '分野のみ', field: fieldStrOf(f.id), tree: '', path: '', parent: pn && pn.sid ? pn.sid : '' });
+    } else {
+      row = Object.assign(base, { stage: '配置済み', field: fieldOfRoot(p[0]), tree: top.title || '', path: p.map(i => data.nodes[i].title || '（無題）').join(' › '), parent: pn && pn.sid ? pn.sid : '' });
+    }
     rows.push(row);
     (n.psid || []).forEach(pid => rows.push(Object.assign({}, row, { id: pid, kind: '趣旨', parent: n.sid })));
   });
   return { format: 'decisions-placement', version: 1, source: 'tree', exportedAt: new Date().toISOString(), rows };
 }
-let placeHandle = null;
-async function writePlacement() {
+let placeHandle = null, placeLast = '', placeTimer = null;
+const placeSig = () => JSON.stringify(buildPlacement().rows);
+async function writePlacement(auto) {   // auto＝編集のあとの自動書き出し（前に選んだファイルに、許可が残っているときだけ・静かに）
   const text = JSON.stringify(buildPlacement(), null, 1);
   const n = JSON.parse(text).rows.length;
-  if (!n) { showBanner('配置が決まった、向こうからのブロックが、まだありません。置き場から出したあとに書き出せます。', 'err'); return; }
+  if (!auto && !n && !placeHandle) { showBanner('分野に入れた（または置いた）、向こうからのブロックが、まだありません。「分野に入れる」を済ませたあとに書き出せます。', 'err'); return; }
   try {
     if (canFile) {
-      if (placeHandle && !(await ensurePerm(placeHandle))) placeHandle = null;
+      if (auto) { if (!placeHandle || (await placeHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') return; }
+      else if (placeHandle && !(await ensurePerm(placeHandle))) placeHandle = null;
       if (!placeHandle) {
         placeHandle = await window.showSaveFilePicker({ suggestedName: 'DB配置.json', types: [{ description: '配置ファイル（JSON）', accept: { 'application/json': ['.json'] } }] });
         try { await idbSet('placeHandle', placeHandle); } catch (e) {}
       }
       const w = await placeHandle.createWritable(); await w.write(text); await w.close();
-      showBanner('配置ファイル「' + placeHandle.name + '」に ' + n + '件を書きました。');
-    } else { download('DB配置.json', text); showBanner('「DB配置.json」を保存しました（' + n + '件）。'); }
-  } catch (e) { if (e && e.name !== 'AbortError') showBanner('書き出せませんでした：' + e.message, 'err'); }
+      placeLast = placeSig();
+      if (!auto) showBanner('配置ファイル「' + placeHandle.name + '」に ' + n + '件を書きました。以後は、編集のあと自動で書き直します。');
+    } else if (!auto) { download('DB配置.json', text); showBanner('「DB配置.json」を保存しました（' + n + '件）。'); }
+  } catch (e) { if (!auto && e && e.name !== 'AbortError') showBanner('書き出せませんでした：' + e.message, 'err'); }
 }
+function autoPlacement() { if (!placeHandle || restoring || !data) return; if (placeSig() === placeLast) return; writePlacement(true); }
 
 /* 説明文（使い方.txt・AIへの指示文に使う） */
 const CSV_SPEC = `【取り込み用の表（CSV）の書き方】
@@ -1283,7 +1317,8 @@ const USAGE_TXT = `判断ロジックツリー　使い方メモ
 3. Claudeなどに、コピーした指示文を貼り、最後の【素材】の下に、1.のテキストを貼って送る。
 4. 返ってきたCSV（コードブロックの中身）を、メモ帳などに貼って、「〇〇.csv」として保存する（文字コードはUTF-8）。
 5. 「⇅ CSV・AI」→「CSV・受け渡しファイルを取り込む」で、そのファイルを選ぶ。
-6. 取り込んだものは、分野ツリーの下の「📥 暫定の置き場」に入る。内容を確認して、ブロックを選び、右の「◀ 組み方」欄の「置き場所を決める」で、分野に登録するか、既存のブロックの下に置く。
+6. 取り込んだものは、分野ツリーの下の「📥 暫定の置き場（未分類）」に入る。ブロックの「分野に入れる」を押し、右の「◀ 組み方」欄で、既にある分野を選ぶ（新しい分野名を入れて作ることもできる）。すると、そのまとまりは、その分野の「📥 この分野の暫定の置き場」に移る。
+7. その分野のツリーを開き、置き場のブロックの「置き場所を決める」で、その分野のツリーの中のどこかの下につなぐ（その分野にツリーが無いときは、最上位のツリーにする）。
 ・取り込みでは、既存のブロックは上書きされません（必ず新しいブロックとして入ります）。
 ・うまくいかないときは、AIに「この行の親の指定が違う」などと伝えて、CSVを直してもらってください。
 
@@ -1298,7 +1333,7 @@ ${CSV_SPEC}
 
 ・向こうで直して送り直したブロックは、置き場に「更新版」として届きます。ブロックを選ぶと右の欄に「前の版と入れ替える」が出て、同じ場所に入れ替わります（前の版にこちらで書き足した内容は移りません）。
 ・向こうの「判断」「要件」「括弧（グループ）」「趣旨」にも対応しています（括弧は「括弧」の印が付いたブロックになります）。向こうのカードに、データベースのブロックから戻るには、ブロックを選んで右の欄の「論証フローチャートで開く」を押します（最初の1回だけ、向こうのページのアドレスを聞かれます）。向こうから、このツリーの該当ブロックを開くリンク（decisions.html#node=…）も使えます。
-・置き場所が決まったブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（分野名・ツリー上の道すじ。判断・要件・括弧・趣旨のそれぞれのid）を書いたファイル（DB配置.json）にできます。向こうのページが読むためのものです。
+・分野に入れた・置いたブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（stage＝分野のみ／配置済み、分野名、ツリー上の道すじ。判断・要件・括弧・趣旨のそれぞれのid）を書いたファイル（DB配置.json）にできます。初回に保存先を選ぶと、以後は編集のあと自動で書き直します。向こうのページが読むためのものです（未分類のものは書きません）。
 
 ■ 主な操作
 ・ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（ダブルクリック、F2）＝編集。Esc＝編集を終える。
@@ -1584,14 +1619,9 @@ function applyHash(final) {
   if (n) { reveal(n.id); history.replaceState(null, '', location.pathname + location.search); }
   else if (final) showBanner('リンク先のブロック「' + id + '」は、まだこのツリーに取り込まれていません。向こうで「送信」したあと、「受け取りファイル」から取り込んでください。', 'err');
 }
+const RONSHO_URL = 'https://gitwallaby.github.io/ronsho/ronsho.html';
 function openInRonsho(sid) {
-  let base = prefs.ronshoUrl || '';
-  if (!base) {
-    base = (window.prompt('論証フローチャートのページのアドレスを、もう一つのタブからコピーして貼り付けてください（最初の1回だけ）。\n例：https://gitwallaby.github.io/…/ronsho.html', '') || '').trim();
-    if (!/^https?:\/\//.test(base)) { if (base) showBanner('アドレスの形が違います（https:// で始まるものを貼ってください）。', 'err'); return; }
-    prefs.ronshoUrl = base.split('#')[0]; savePrefs();
-  }
-  window.open(prefs.ronshoUrl + '#fc=' + encodeURIComponent(sid), '_blank');
+  window.open((prefs.ronshoUrl || RONSHO_URL) + '#fc=' + encodeURIComponent(sid), '_blank');
 }
 window.addEventListener('hashchange', () => applyHash(true));
 
@@ -1716,11 +1746,14 @@ function nodeLi(id, link, path, bi) {
   if (n.fld) row.appendChild(el('span', 'cnt', n.fld));
   if (n.src) row.title = '出どころ：' + n.src;
   if (!link && n.inbox && !cyc) {
-    const pb = el('button', 'sm', '置き場所を決める ▸');
+    const fnode = ifldNode(n);
+    if (fnode && view.type === 'map') row.appendChild(el('span', 'cnt', '分野：' + (fieldStrOf(fnode.id) || '無題')));
+    const pb = el('button', 'sm', fnode ? '置き場所を決める ▸' : '分野に入れる ▸');
     pb.onclick = e => { e.stopPropagation(); selKey = key; editing = false; prefs.panel = true; savePrefs(); render(); };
     row.appendChild(pb);
   }
   if (jumpOk) row.appendChild(el('span', 'jump', '↗ ' + (data.nodes[n.jump].title || '無題')));
+  if (n.sid && n.ssrc === 'flowchart' && !isEdit && !cyc) { const rb = el('button', 'ichip', '論証 ↗'); rb.title = '論証フローチャートで、元のカードを開く'; rb.onclick = e => { e.stopPropagation(); openInRonsho(n.sid); }; row.appendChild(rb); }
   if (hasKids) row.appendChild(el('span', 'cnt' + (open ? ' open' : ''), '↳' + kidsAll.length));
   const uses = parentsOf(id).length + (data.roots.includes(id) ? 1 : 0);
   if (uses > 1 && !plain) row.appendChild(el('span', 'shared', '🔗' + uses));
@@ -1935,7 +1968,7 @@ function focusIfWanted() {
   const t = document.querySelector('#tree .row.sel input.tin');
   if (t) { t.focus(); const l = t.value.length; t.setSelectionRange(l, l); }
 }
-const viewRoots = () => view.type === 'map' ? homeIds().concat(inboxIds()) : (data.nodes[view.rootId] ? [view.rootId] : []);
+const viewRoots = () => view.type === 'map' ? homeIds().concat(unsortedIds(), noTreePendingIds()) : (data.nodes[view.rootId] ? [view.rootId].concat(fieldPendingIds(view.rootId)) : []);
 function expandAllFrom(roots) {
   const walk = (id, path) => { if (path.includes(id) || !data.nodes[id]) return; const n = data.nodes[id]; if (n.kids.length) expanded.add(path.concat(id).join('>')); n.kids.forEach(k => walk(k.id, path.concat(id))); };
   roots.forEach(r => walk(r, []));
@@ -1983,9 +2016,10 @@ function renderTree() {
     box.appendChild(el('div', 'empty', view.type === 'map' ? '分野ツリーはまだ空です。「＋新しいツリー」で分野名を作り、右の「組み方」欄で、開くツリーを設定してください。' : 'このツリーは見つかりません。'));
   }
   const ul = el('ul', 'roots');
-  (view.type === 'map' ? roots.filter(r => data.nodes[r].home) : roots).forEach(id => ul.appendChild(nodeLi(id, null, [], null)));
+  (view.type === 'map' ? roots.filter(r => data.nodes[r].home) : roots.filter(r => !data.nodes[r].inbox)).forEach(id => ul.appendChild(nodeLi(id, null, [], null)));
   box.appendChild(ul);
   if (view.type === 'map') box.appendChild(inboxSection());
+  else { const pend = fieldPendingIds(view.rootId); if (pend.length) box.appendChild(fieldInboxSection(pend)); }
   if (view.type === 'map') {
     const jumped = new Set(Object.values(data.nodes).map(n => n.jump).filter(Boolean));
     const nr = data.roots.filter(r => data.nodes[r] && !jumped.has(r));
@@ -2010,9 +2044,9 @@ function renderTree() {
   $('#btnRoot').textContent = view.type === 'map' ? '＋分野を追加' : '＋新しいツリー';
 }
 function inboxSection() {
-  const ids = inboxIds(), wrap = el('div', 'inboxsec');
+  const ids = unsortedIds(), wrap = el('div', 'inboxsec');
   const h = el('div', 'inboxh');
-  h.appendChild(el('b', null, '📥 暫定の置き場（' + ids.length + '件）'));
+  h.appendChild(el('b', null, '📥 暫定の置き場（未分類 ' + ids.length + '件）'));
   const bs = el('span', 'inboxb');
   const add = (tx, f, tip) => { const b = el('button', 'sm', tx); if (tip) b.title = tip; b.onclick = f; bs.appendChild(b); };
   if (canFile) add('受け取りファイルを選ぶ', pickInbox, '別ページが「送信」で書き出したファイル（Googleドライブ内）を選ぶ');
@@ -2020,11 +2054,24 @@ function inboxSection() {
   add('CSV・受け渡しファイルを取り込む', () => $('#csvIn').click());
   add('受け取り履歴を消す', () => { if (confirm('「受け取り済み」の記録を消します。受け取りファイルの中身は、次回また最初から取り込まれます。よろしいですか？')) { data.seen = {}; changed(); showBanner('受け取り履歴を消しました。'); } }, '消した置き場のブロックを、もう一度受け取りたいとき');
   h.appendChild(bs); wrap.appendChild(h);
-  if (!ids.length) wrap.appendChild(el('div', 'hint', 'いま届いているものはありません。CSV・受け渡しファイルを取り込むと、ここに入ります。'));
+  if (!ids.length) wrap.appendChild(el('div', 'hint', 'いま、未分類のものはありません。CSV・受け渡しファイルを取り込むと、ここに入ります。'));
   else {
-    wrap.appendChild(el('div', 'hint', 'ブロックの「置き場所を決める」を押すと、右の欄で、分野に登録するか、既存のブロックの下に置けます。'));
+    wrap.appendChild(el('div', 'hint', 'ブロックの「分野に入れる」を押すと、右の欄で分野を選べます。選ぶと、その分野の「この分野の暫定の置き場」に移ります。'));
     const ul = el('ul', 'roots'); ids.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul);
   }
+  const nt = noTreePendingIds();
+  if (nt.length) {
+    wrap.appendChild(el('div', 'hint', '分野だけ決めたもの（その分野のツリーが、まだありません）：「置き場所を決める」で、最上位のツリーにできます。'));
+    const ul = el('ul', 'roots'); nt.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul);
+  }
+  return wrap;
+}
+function fieldInboxSection(ids) {
+  const wrap = el('div', 'inboxsec'), h = el('div', 'inboxh');
+  h.appendChild(el('b', null, '📥 この分野の暫定の置き場（' + ids.length + '件）'));
+  wrap.appendChild(h);
+  wrap.appendChild(el('div', 'hint', 'ブロックの「置き場所を決める」を押すと、右の欄で、この分野のツリーの中のどこかの下に置けます。'));
+  const ul = el('ul', 'roots'); ids.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul);
   return wrap;
 }
 function expandTo(d) {
@@ -2042,7 +2089,9 @@ function reveal(id) {
   const p = findPath(id);
   if (p) {
     const top = p[0];
-    if (data.nodes[top] && (data.nodes[top].home || data.nodes[top].inbox)) view = { type: 'map' };
+    const tn = data.nodes[top];
+    if (tn && tn.home) view = { type: 'map' };
+    else if (tn && tn.inbox) { const f = ifldNode(tn), r = f && fieldRootOf(f); view = r ? { type: 'field', rootId: r } : { type: 'map' }; }
     else if (!(view.type === 'field' && view.rootId === top)) view = { type: 'field', rootId: top };
     for (let i = 1; i < p.length; i++) expanded.add(p.slice(0, i).join('>')); selKey = p.join('>');
   } else selKey = id;
@@ -2070,7 +2119,8 @@ function renderPanel() {
   }
   const isMap = view.type === 'map' && !n.inbox && !(data.nodes[path[0]] && data.nodes[path[0]].inbox);
   if (path.length === 1 && n.inbox) {
-    P.appendChild(el('div', 'sec', '置き場所を決める（暫定の置き場から出す）'));
+    const fnode = ifldNode(n), froot = fieldRootOf(fnode);
+    P.appendChild(el('div', 'sec', fnode ? '置き場所を決める（分野：' + (fieldStrOf(fnode.id) || '無題') + '）' : '分野に入れる（未分類）'));
     if (n.prev && data.nodes[n.prev]) {
       const po = data.nodes[n.prev], pp = findPath(n.prev);
       P.appendChild(el('div', 'hint', '★ これは、以前に取り込んだ「' + (po.title || '無題') + '」' + (pp ? '（' + pp.map(i => data.nodes[i].title || '無題').join(' › ') + '）' : '') + 'を、向こうで直して送り直したものです。'));
@@ -2084,29 +2134,49 @@ function renderPanel() {
       tb.onclick = () => placeUnder(id, n.ptarget, 'req');
       P.appendChild(tb);
     }
-    P.appendChild(el('div', 'hint', 'どちらか1つを選びます。どちらでも、置いた後に、ブロックの内容や位置づけは自由に直せます。'));
-    P.appendChild(el('div', 'hint', '① 新しい分野のツリーとして登録（分野ツリーに、分野名が入ります）'));
-    const fi = el('input'); fi.type = 'text'; fi.value = n.fld || ''; fi.placeholder = '分野名（例：民法　または　法律/民法）';
+    // ② 分野に入れる（分野のみのときは「分野を変える」）
+    P.appendChild(el('div', 'hint', fnode ? '分野を変えるとき：' : '既にある分野から選ぶか、新しい分野名を入れます。入れると、このまとまりは、その分野の暫定の置き場に移ります（分野ツリーの中には、まだつなぎません）。'));
+    const fs = el('select'); const f0 = el('option', null, '（既にある分野から選ぶ）'); f0.value = ''; fs.appendChild(f0);
+    fieldList().forEach(x => { const o = el('option', null, x.label); o.value = x.id; if (fnode && fnode.id === x.id) o.selected = true; fs.appendChild(o); });
+    P.appendChild(fs);
+    const fi = el('input'); fi.type = 'text'; fi.value = ''; fi.placeholder = '新しい分野名（例：民法　または　法律/民法）' + (n.fld ? '　向こうの案：' + n.fld : ''); fi.style.marginTop = '6px';
     P.appendChild(fi);
-    const fb = el('button', 'sm', 'この分野の最上位のツリーとして登録'); fb.style.marginTop = '6px';
-    fb.onclick = () => placeAsField(id, fi.value);
-    P.appendChild(fb);
-    P.appendChild(el('div', 'hint', '② 既にあるブロックの下に置く（名前の一部で探す）'));
-    const q = el('input'); q.type = 'search'; q.placeholder = '置き先の名前の一部（例：窃取）';
-    const sel = el('select'); sel.size = 5; sel.style.marginTop = '6px';
-    const rs = el('select'); [['req', '要件として'], ['exc', 'ただし（例外）として'], ['?', '未設定で']].forEach(([v, tx]) => { const o = el('option', null, tx); o.value = v; rs.appendChild(o); });
-    rs.style.marginTop = '6px';
-    const pb = el('button', 'sm', 'ここの下に置く'); pb.style.marginTop = '6px';
-    const fill = () => {
-      sel.textContent = '';
-      if (!q.value.trim()) { const o = el('option', null, '（名前を入力すると、候補が出ます）'); o.value = ''; sel.appendChild(o); return; }
-      const c = inboxTargets(id, q.value.trim());
-      if (!c.length) { const o = el('option', null, '（見つかりません）'); o.value = ''; sel.appendChild(o); return; }
-      c.forEach(x => { const o = el('option', null, x.label); o.value = x.id; sel.appendChild(o); });
+    const fb = el('button', 'sm', fnode ? 'この分野に変える' : 'この分野に入れる'); fb.style.marginTop = '6px';
+    fb.onclick = () => {
+      const name = fi.value.trim(), mid = name ? ensureFieldPath(name) : fs.value;
+      if (!mid) { showBanner('分野を選ぶか、新しい分野名を入れてください。', 'err'); return; }
+      assignField(id, mid);
     };
-    q.oninput = fill; fill();
-    pb.onclick = () => { if (!sel.value) { showBanner('置き先を選んでください。', 'err'); return; } placeUnder(id, sel.value, rs.value); };
-    P.append(q, sel, rs, pb);
+    P.appendChild(fb);
+    if (fnode) {
+      const bk = el('button', 'sm', '未分類にもどす'); bk.style.cssText = 'margin:6px 0 0 6px';
+      bk.onclick = () => { delete n.ifld; changed(); render(); showBanner('未分類にもどしました。'); };
+      P.appendChild(bk);
+      // ③ 分野の中に置く
+      P.appendChild(el('div', 'hint', 'この分野のツリーの中に置く：'));
+      if (froot) {
+        P.appendChild(el('div', 'hint', '置き先の名前の一部で探します（この分野のツリーの中だけ。空欄なら全部）。'));
+        const q = el('input'); q.type = 'search'; q.placeholder = '置き先の名前の一部（例：窃取）';
+        const sel = el('select'); sel.size = 5; sel.style.marginTop = '6px';
+        const rs = el('select'); [['req', '要件として'], ['exc', 'ただし（例外）として'], ['?', '未設定で']].forEach(([v, tx]) => { const o = el('option', null, tx); o.value = v; rs.appendChild(o); });
+        rs.style.marginTop = '6px';
+        const pb = el('button', 'sm', 'ここの下に置く'); pb.style.marginTop = '6px';
+        const fill = () => {
+          sel.textContent = '';
+          const c = inboxTargets(id, q.value.trim(), froot);
+          if (!c.length) { const o = el('option', null, '（見つかりません）'); o.value = ''; sel.appendChild(o); return; }
+          c.forEach(x => { const o = el('option', null, x.label); o.value = x.id; sel.appendChild(o); });
+        };
+        q.oninput = fill; fill();
+        pb.onclick = () => { if (!sel.value) { showBanner('置き先を選んでください。', 'err'); return; } placeUnder(id, sel.value, rs.value); };
+        P.append(q, sel, rs, pb);
+      } else {
+        P.appendChild(el('div', 'hint', 'この分野には、まだツリーがありません。このまとまりを、その分野の最上位のツリーにできます。'));
+        const tb = el('button', 'sm', 'この分野の最上位のツリーにする');
+        tb.onclick = () => placeAsTop(id, fnode.id);
+        P.appendChild(tb);
+      }
+    }
   }
   if (isMap) {
     P.appendChild(el('div', 'sec', 'この分野が開くツリー'));
