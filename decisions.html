@@ -111,6 +111,7 @@ li.ghead.wg span{background:var(--wgbg);color:var(--wg)}
 .badge.or{background:var(--orbg);color:var(--or)}
 .badge.wg{background:var(--wgbg);color:var(--wg)}
 .badge.tier{background:rgba(127,127,127,.18);color:var(--fg)}
+.badge.int{border:1px solid #3a8a8a;color:#2a7a7a;background:none}
 .badge.unset{border:1px dashed var(--sub);color:var(--sub);background:none}
 .cnt{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:0 6px;white-space:nowrap}
 .cnt.open{opacity:.55}
@@ -215,7 +216,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 11/19 夜（分野の流れ）</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 11/20 昼（考慮要素・解釈基準）</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnSamples" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button>
@@ -343,7 +344,7 @@ function normalize(d) {
     if (!out.nodes[id] || !Array.isArray(n.kids)) continue;
     n.kids.forEach(k => {
       if (k && out.nodes[k.id] && k.id !== id && !out.nodes[id].kids.some(x => x.id === k.id))
-        out.nodes[id].kids.push({ id: k.id, role: (k.role === 'exc' || k.role === '?') ? k.role : 'req', w: s(k.w), tier: TIERS.includes(k.tier) ? k.tier : '' });
+        out.nodes[id].kids.push(Object.assign({ id: k.id, role: (k.role === 'exc' || k.role === '?') ? k.role : 'req', w: s(k.w), tier: TIERS.includes(k.tier) ? k.tier : '' }, ['考慮要素', '解釈基準'].includes(k.ty) ? { ty: k.ty } : {}));
     });
   }
   for (const [id, n] of Object.entries(d.nodes)) {   // 重ねる枠組み（上位規範）
@@ -1048,7 +1049,7 @@ function ingestRows(rows, source) {
     if (pid && pid !== cid) {
       const p = data.nodes[pid];
       if (reaches(cid, pid)) { res.notes.push('「' + (data.nodes[cid].title || '無題') + '」は循環になるため、つなぎませんでした'); return; }
-      if (!p.kids.some(k => k.id === cid)) p.kids.push({ id: cid, role: roleFrom(r.role), w: r.weight || '', tier: tierFrom(r.tier) });
+      if (!p.kids.some(k => k.id === cid)) p.kids.push(Object.assign({ id: cid, role: roleFrom(r.role), w: r.weight || '', tier: tierFrom(r.tier) }, ['考慮要素', '解釈基準'].includes(r.tag) ? { ty: r.tag } : {}));
       hasParent.add(cid);
     } else if (r.parent) res.notes.push('親「' + r.parent + '」が見つからない行を、最上位として置き場に入れました');
   });
@@ -1529,7 +1530,7 @@ function copySel(cut) {
   const path = selKey.split('>'), id = path[path.length - 1], link = linkOf(path);
   const ids = subtreeIds(id), nodes = {};
   ids.forEach(i => { nodes[i] = JSON.parse(JSON.stringify(data.nodes[i])); });
-  clip = { mode: cut ? 'cut' : 'copy', root: id, nodes, role: link ? link.role : '?', w: link ? link.w : '', tier: link ? link.tier : '' };
+  clip = { mode: cut ? 'cut' : 'copy', root: id, nodes, role: link ? link.role : '?', w: link ? link.w : '', tier: link ? link.tier : '', ty: link ? link.ty : undefined };
   if (cut) {
     if (path.length === 1) { data.roots = data.roots.filter(r => r !== id); delete data.nodes[id].home; selKey = null; }
     else { const p = data.nodes[path[path.length - 2]]; p.kids = p.kids.filter(k => k.id !== id); selKey = path.slice(0, -1).join('>'); }
@@ -1546,7 +1547,7 @@ function pasteSel() {
     if (target && reaches(clip.root, target)) { showBanner('自分自身の下には貼り付けられません。', 'err'); return; }
     newId = clip.root;
     if (!target) { if (view.type === 'map') data.nodes[newId].home = true; else if (!data.roots.includes(newId)) data.roots.push(newId); }
-    else if (!data.nodes[target].kids.some(k => k.id === newId)) data.nodes[target].kids.push({ id: newId, role: clip.role, w: clip.w || '', tier: clip.tier || '' });
+    else if (!data.nodes[target].kids.some(k => k.id === newId)) data.nodes[target].kids.push(Object.assign({ id: newId, role: clip.role, w: clip.w || '', tier: clip.tier || '' }, clip.ty ? { ty: clip.ty } : {}));
     clip = null;
   } else {
     const map = {}; Object.keys(clip.nodes).forEach(i => { map[i] = uid(); });
@@ -1561,7 +1562,7 @@ function pasteSel() {
     });
     newId = map[clip.root];
     if (!target) { if (view.type === 'map') data.nodes[newId].home = true; else data.roots.push(newId); }
-    else data.nodes[target].kids.push({ id: newId, role: clip.role, w: clip.w || '', tier: clip.tier || '' });
+    else data.nodes[target].kids.push(Object.assign({ id: newId, role: clip.role, w: clip.w || '', tier: clip.tier || '' }, clip.ty ? { ty: clip.ty } : {}));
   }
   if (target) { expanded.add(selKey); selKey = selKey + '>' + newId; } else { selKey = newId; if (view.type === 'field') view = { type: 'field', rootId: newId }; }
   editing = false; changed(); render(); showBanner('貼り付けました。');
@@ -1660,7 +1661,7 @@ function moveBlock(srcPath, tpath, zone, shift) {
   // 2. 新しい場所に入れる
   const np = data.nodes[newPid];
   const ex = np.kids.findIndex(k => k.id === sid); if (ex >= 0) np.kids.splice(ex, 1);   // 同じ親の中の並べ替え
-  const nl = { id: sid, role: link.role || '?', w: link.w || '', tier: link.tier || '' };
+  const nl = { id: sid, role: link.role || '?', w: link.w || '', tier: link.tier || '' }; if (link.ty) nl.ty = link.ty;
   if (zone === 'into') np.kids.push(nl);
   else { const j = np.kids.findIndex(k => k.id === tid); np.kids.splice(zone === 'before' ? j : j + 1, 0, nl); }
   // 3. 表示の状態：開いていた場所を、新しい道すじに写す
@@ -1811,7 +1812,7 @@ function nodeLi(id, link, path, bi) {
     const minus = el('button', 'minus', '−'); minus.title = '下位要件を隠す';
     minus.onclick = e => { e.stopPropagation(); expanded.delete(key); renderTree(); };
     ul.appendChild(minus);
-    const reqCount = kidsAll.filter(k => k.role === 'req').length;
+    const reqCount = kidsAll.filter(k => k.role === 'req' && !k.ty).length;
     if (!plain) {
       if (reqCount > 0 && n.mode === 'and' && reqCount > 1) { const g = el('li', 'ghead and'); g.appendChild(el('span', null, '次のすべてを満たす')); ul.appendChild(g); }
       if (reqCount > 0 && n.mode === 'or') { const g = el('li', 'ghead or'); g.appendChild(el('span', null, '次のどれか1つを満たせばよい')); ul.appendChild(g); }
@@ -1821,7 +1822,8 @@ function nodeLi(id, link, path, bi) {
     kidsAll.forEach(k => {
       let b = null;
       if (!plain) {
-        if (k.role === 'exc') b = { text: 'ただし', cls: 'exc' };
+        if (k.ty) b = { text: k.ty, cls: k.ty === '考慮要素' ? 'wg' : 'int' };
+        else if (k.role === 'exc') b = { text: 'ただし', cls: 'exc' };
         else if (k.role === '?') b = { text: '未設定', cls: 'unset' };
         else {
           ri++;
@@ -1833,7 +1835,7 @@ function nodeLi(id, link, path, bi) {
         }
       }
       const c = nodeLi(k.id, k, myPath, b);
-      if (!plain && k.role === 'req') {
+      if (!plain && k.role === 'req' && !k.ty) {
         if (n.mode === 'or' && reqCount > 1) c.classList.add('orkid');
         else if (n.mode === 'weigh') c.classList.add('wgkid');
         else if (n.mode === 'and' && reqCount > 1) c.classList.add('andkid');
@@ -1858,13 +1860,14 @@ function makeFrameView(fid, i, ownerId) {
   const go = el('button', 'sm', '本体を開く'); go.onclick = e => { e.stopPropagation(); reveal(fid); };
   h.appendChild(go); box.appendChild(h);
   if (f.purpose) box.appendChild(el('div', 'fp', f.purpose.length > 90 ? f.purpose.slice(0, 90) + '…' : f.purpose));
-  const reqCount = kids.filter(k => k.role === 'req').length;
+  const reqCount = kids.filter(k => k.role === 'req' && !k.ty).length;
   if (reqCount > 0 && f.mode === 'or') box.appendChild(el('div', 'fp', '次のどれか1つ'));
   if (reqCount > 0 && f.mode === 'weigh') box.appendChild(el('div', 'fp', '次を、比重をつけて総合考慮する'));
   let ri = 0;
   kids.forEach(k => {
     const c = data.nodes[k.id]; let tx, cls;
-    if (k.role === 'exc') { tx = 'ただし'; cls = 'exc'; }
+    if (k.ty) { tx = k.ty; cls = k.ty === '考慮要素' ? 'wg' : 'int'; }
+    else if (k.role === 'exc') { tx = 'ただし'; cls = 'exc'; }
     else if (k.role === '?') { tx = '未設定'; cls = 'unset'; }
     else {
       ri++;
