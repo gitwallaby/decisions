@@ -216,7 +216,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611202144</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611202315</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
@@ -1672,7 +1672,7 @@ function applyHash(final) {
   if (n) { reveal(n.id); history.replaceState(null, '', location.pathname + location.search); }
   else if (final) showBanner('リンク先のブロック「' + id + '」は、まだこのツリーに取り込まれていません。向こうで「送信」したあと、「受け取りファイル」から取り込んでください。', 'err');
 }
-const RONSHO_URL = 'https://gitwallaby.github.io/ronsho/ronsho.html';
+const RONSHO_URL = 'https://gitwallaby.github.io/logic_chart/logic_chart.html';
 function openInRonsho(sid) {
   window.open((prefs.ronshoUrl || RONSHO_URL) + '#fc=' + encodeURIComponent(sid), '_blank');
 }
