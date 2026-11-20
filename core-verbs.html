@@ -83,8 +83,13 @@ details.v.attr{--vc:var(--attr);--vbg:var(--attrbg)}
 .vlabel{font-size:11px;font-weight:700;color:var(--vc,var(--sub))}
 .cnt{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:0 6px;font-weight:400}
 /* 入れ子（直列）は大きく右へ。同じ高さに並ぶもの（並列）は同じ位置 */
-.gbody{margin:2px 0 6px 14px;padding-left:26px;border-left:3px solid var(--line)}
-details.v>.gbody{border-left-color:var(--vc)}
+.gbody{--lc:var(--line);margin:2px 0 6px 14px;padding-left:30px;border-left:3px solid var(--lc);position:relative}
+details.v>.gbody{--lc:var(--vc)}
+.gbody>details.g,.gbody>.card{position:relative}
+.gbody>details.g::before,.gbody>.card::before{content:"";position:absolute;left:-30px;top:17px;width:26px;border-top:3px solid var(--lc)}
+.gbody>details.g::after,.gbody>.card::after{content:"";position:absolute;left:-6px;top:11px;border:6px solid transparent;border-left:7px solid var(--lc);border-right:0}
+.gbody>details.v::before{top:19px}
+.gbody>details.v::after{top:13px}
 .ic{font-size:1.1em}
 details.g>summary .nm{flex:1 1 8em;min-width:0}
 details.v>summary .nm{flex:0 1 auto}
@@ -151,7 +156,8 @@ kbd{font:inherit;font-size:11px;border:1px solid var(--border);border-bottom-wid
 @media(max-width:820px){
   .main{grid-template-columns:1fr;padding:10px}
   #tree{max-height:none;overflow:visible}
-  .gbody{margin-left:4px;padding-left:14px}
+  .gbody{margin-left:4px;padding-left:20px}
+  .gbody>details.g::before,.gbody>.card::before{left:-20px;width:16px}
   #panel{display:none}
   .lang{grid-template-columns:1fr}
   .lname{padding-top:0}
@@ -164,7 +170,7 @@ kbd{font:inherit;font-size:11px;border:1px solid var(--border);border-bottom-wid
 </head>
 <body>
 <header>
-  <h1>コア動詞ツリー</h1>
+  <h1>コア動詞ツリー <small id="ver" style="font-weight:400;font-size:11px;color:var(--sub)">版 11/20-b</small></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnSync" class="primary" title="データファイル（Googleドライブ等）と同期：編集時刻が新しい方を採用して、両方を最新にします">🔄 同期</button>
