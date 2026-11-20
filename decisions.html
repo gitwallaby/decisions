@@ -216,17 +216,15 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 11/20 昼（考慮要素・解釈基準）</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611202144</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
-    <button id="btnSamples" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button>
-    <button id="btnSync" class="primary" title="データファイル（Googleドライブ等）と同期：編集時刻が新しい方を採用して、両方を最新にします">🔄 同期</button>
+    <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
+    <button id="btnSync" class="primary" title="保存先ファイルと同期し、フローチャート側から届いたもの（受け取りファイル）も自動で読み込みます" hidden>🔄 同期</button>
+    <button id="btnPull" title="保存先ファイルの内容を、この画面に取り込みます（編集時刻が新しい方を採用）" hidden>⬇ インポート</button>
+    <button id="btnPush" title="いまの内容を、保存先ファイルに書き出します" hidden>⬆ エクスポート</button>
     <button id="btnIo" title="CSVの取り込み・書き出し、AIに渡す指示文、使い方メモ">⇅ CSV・AI</button>
     <button id="btnKeys" title="キー操作の割り当てを変更">⌨ キー設定</button>
-    <button id="btnOpen" title="自分のPCにあるデータファイルを開く">📂 ファイルを開く</button>
-    <button id="btnSaveAs" title="データの保存先ファイルを新しく作る">💾 保存先ファイルを作る</button>
-    <button id="btnExport" title="データをファイルとしてダウンロード">⬇ 書き出し</button>
-    <button id="btnImport" title="書き出したファイルを読み込む">⬆ 読み込み</button>
     <input type="file" id="fileIn" accept=".json,application/json" hidden>
   </div>
 </header>
@@ -234,13 +232,14 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <summary>使い方・データの扱い</summary>
   <p><b>データの扱い</b>：このページ（アプリ本体・GitHub）には、書いた内容は一切入りません。内容は、別のデータファイル（あなたのGoogleドライブなど）にだけ保存されます。内容は「①このブラウザの中（自動保存）」と「②あなたが選んだデータファイル」にだけ保存され、ネットには送られません。「💾 保存先ファイルを作る」でGoogleドライブなどにファイルを作ると、以後は編集のたびに自動でそのファイルと同期します（PCのChrome・Edge）。<b>同期のルール</b>：ブロックごとに、編集時刻が新しい方を採用します（Ankiと同じ考え方）。別の端末で更新したときは、画面に戻った時や「🔄 同期」で取り込みます。新しい端末では、最初に「📂 ファイルを開く」でデータファイルを選んでください（サンプルが混ざるのを防ぐため）。</p>
   <p><b>操作</b>：ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（またはダブルクリック、<kbd>F2</kbd>）＝編集モード（名前の編集と、趣旨・具体例の入力欄が開く）。「趣旨」「具体例」の小さなボタンで、内容の表示・非表示を切り替えます。<kbd>Esc</kbd>で編集モードを終える。下位要件を閉じるには、線の途中の「−」。ブロックの右の「↳3」は、下に3つ要素があるという印です。</p>
-  <p><b>資料の取り込み（CSV）</b>：「⇅ CSV・AI」から、AIに渡す指示文をコピーし、Vflatの文字起こしやNotebookLMのまとめと一緒にAIに渡すと、取り込み用のCSVを作ってもらえます。取り込んだものは「📥 暫定の置き場（未分類）」に入ります。まず「分野に入れる」で分野を選び、次にその分野のツリーを開いて「置き場所を決める」で、どのブロックの下に置くかを決めます。書き方の詳しい説明は、「使い方.txt」にあります。</p>
+  <p><b>資料の取り込み（CSV）</b>：「⇅ CSV・AI」から、AIに渡す指示文をコピーし、Vflatの文字起こしやNotebookLMのまとめと一緒にAIに渡すと、取り込み用のCSVを作ってもらえます。取り込んだものは「📥 未分類ツリー（）」に入ります。まず「分野に入れる」で分野を選び、次にその分野のツリーを開いて「置き場所を決める」で、どのブロックの下に置くかを決めます。書き方の詳しい説明は、「decision_tree_usage.txt」にあります。</p>
   <p><b>分野ツリー（ホーム画面）</b>：左上の「🏠 分野ツリー」が、分野の一覧（地図）です。分野名をクリックすると、その分野のツリーだけが表示されます。分野の追加・並べ替えは、分野ツリーの中で、ふつうのブロックと同じように行えます。分野名のブロックに「開くツリー」を設定すると、ジャンプ先になります（右の「◀ 組み方」欄）。</p>
   <p><b>ドラッグで位置を変える</b>：ブロックをつかんで、別のブロックの上端（前に置く）・下端（後ろに置く）・中央（中に入れる）に落とします。そのままだと下のブロックごと動き、<kbd>Shift</kbd>を押しながら落とすと、そのブロックだけが動いて、下のブロックはひとつ上の階層に上がります。分野の最上位のブロックは動かせません。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で戻せます。</p>
   <p><b>コピー・切り取り・貼り付け／取り消し</b>：ブロックを選んで <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>X</kbd>／<kbd>V</kbd>（貼り付けは、選んだブロックの下に入ります）。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で元に戻し、<kbd>Ctrl</kbd>+<kbd>Y</kbd>でやり直し。キーは「⌨ キー設定」で変えられます。</p>
   <p><b>ブロックを作る</b>：<kbd>Enter</kbd>＝下、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝上、<kbd>Tab</kbd>＝右（一階層下）、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝左（一階層上）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
   <p><b>要件の組み方</b>：「すべて必要」は青の太い線で束ねて①②③。「どれか1つ」は橙色でA・B・C。「総合考慮」は紫色で、ウェイトと優先度（一次的・副次的・補充的）を書けます。</p>
   <p><b>枠組みの重ね表示</b>：枠組みを重ねたブロックは、ツリー全体の背景に枠組みの色が付き、下に「枠組み：〇〇」の帯が出ます。帯をクリックするとチェック表が開き、各要件がどの要素に対応しているか（未対応はどれか）が分かります。対応は、編集モードの詳細欄「枠組みとの対応」で選びます。</p>
+  <p><b>保存先・バックアップ</b>：<button id="btnSaveAs" class="sm" title="空の新しいファイルを保存先にします。すでに中身のあるファイルは選べません">💾 新しい保存先ファイルを作る（初めてだけ）</button> <button id="btnReconnect" class="sm" title="保存先ファイルを移動・名前変更したときに、つなぎ直す">🔌 保存先を選び直す</button> <button id="btnExport" class="sm" title="データをファイルとしてダウンロード">⬇ 書き出し（バックアップ）</button> <button id="btnImport" class="sm" title="書き出したファイルを読み込む">⬆ 読み込み</button> <button id="btnSamples" class="sm" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button></p>
   <p><button id="btnClear" class="sm danger">データを全部消して白紙にする</button> <span>（取り消せません。先に「書き出し」をおすすめします）</span></p>
 </details>
 <div id="banner"></div>
@@ -274,8 +273,8 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <div class="iorow"><button id="ioImport">2. CSV・受け渡しファイルを取り込む</button><span class="hint">AIが作ったCSV（UTF-8）、または別ページの受け渡しファイル</span></div>
   <div class="iorow"><button id="ioInbox">3. 暫定の置き場を開く</button><span class="hint">届いたブロックの置き場所を決める。受け取りファイルの設定もここ</span></div>
   <div class="iorow"><button id="ioExpView">表示中の分野ツリーをCSVで書き出す</button><button id="ioExpAll">すべてをCSVで書き出す</button></div>
-  <div class="iorow"><button id="ioPlace">配置ファイル（DB配置.json）を書き出す</button><span class="hint">向こうのページへ、置き場所を知らせる用</span></div>
-  <div class="iorow"><button id="ioUsage">使い方.txt を保存（CSVの書き方・AI取り込みの手順）</button></div>
+  <div class="iorow"><button id="ioPlace">配置ファイル（decision_tree_placement.json）を書き出す</button><span class="hint">向こうのページへ、置き場所を知らせる用</span></div>
+  <div class="iorow"><button id="ioUsage">decision_tree_usage.txt を保存（CSVの書き方・AI取り込みの手順）</button></div>
   <div class="dfoot"><button id="ioClose" class="primary">閉じる</button></div>
 </dialog>
 <dialog id="keysDlg">
@@ -292,6 +291,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 const LS_KEY = 'lawtree_v1', PREF_KEY = 'lawtree_prefs', KEYS_KEY = 'lawtree_keys';
 const $ = s => document.querySelector(s);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const tsNow = () => { const x = new Date(), p = n => String(n).padStart(2, '0'); return x.getFullYear() + p(x.getMonth() + 1) + p(x.getDate()) + p(x.getHours()) + p(x.getMinutes()); };
 const uid = () => 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const circ = n => (n <= 20 ? String.fromCharCode(0x2460 + n - 1) : n + '.');
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -751,7 +751,14 @@ function addOtherSamples() {   // サンプル全部（法律・他分野・分�
 
 /* ---------- 保存 ---------- */
 function setStatus(kind, msg) { const c = $('#status'); c.className = 'chip st ' + kind; c.textContent = msg; }
+function refreshBtns() {
+  if (!canFile) return;
+  const c = !!fileHandle;
+  $('#btnImpFile').hidden = c;
+  ['btnSync', 'btnPull', 'btnPush'].forEach(i => { $('#' + i).hidden = !c; });
+}
 function refreshStatus() {
+  refreshBtns();
   const hhmm = d => d.toTimeString().slice(0, 5);
   if (fileHandle) {
     if (fileDirty) setStatus('warn', '同期中…（' + fileName + '）');
@@ -803,8 +810,8 @@ function changed() {
 }
 /* ファイルとの同期：読む→編集時刻の新しい方を採用して統合→必要ならファイルに書く（順番に1つずつ実行） */
 let syncQ = Promise.resolve(), lastSyncAt = 0;
-const syncCore = manual => { const p = syncQ.then(() => doSync(manual)); syncQ = p.catch(() => {}); return p; };
-async function doSync() {
+const syncCore = (manual, mode) => { const p = syncQ.then(() => doSync(manual, mode)); syncQ = p.catch(() => {}); return p; };
+async function doSync(manual, mode) {
   if (!fileHandle) return null;
   stamp();
   const text = await (await fileHandle.getFile()).text();
@@ -822,13 +829,14 @@ async function doSync() {
   } else { pushed = Object.keys(data.nodes).length; showSampleNote = false; }
   const out = JSON.stringify(data, null, 2);
   try { localStorage.setItem(LS_KEY, out); } catch (e) {}
-  if (out !== text) {
+  if (out !== text && mode !== 'in') {
     const w = await fileHandle.createWritable(); await w.write(out); await w.close();
   }
-  fileDirty = false; lastSaved = lastSyncAt = new Date(); lastSyncAt = Date.now(); refreshStatus();
+  fileDirty = (out !== text && mode === 'in'); lastSaved = lastSyncAt = new Date(); lastSyncAt = Date.now(); refreshStatus();
   return { pulled, pushed };
 }
 function syncErr(e) {
+  if (e && e.name === 'NotFoundError') { dropHandle('handle'); return '保存先のデータファイルが見つかりません（フォルダの移動や名前の変更で、つながりが切れました）。上の「📂 保存先からデータをインポート」で、decision_tree.json を選び直してください。'; }
   if (e instanceof SyntaxError) return 'データファイルの中身が壊れているようです。安全のため、上書きを止めました。（Googleドライブの「版を管理」で前の版に戻せることがあります）';
   return 'ファイルと同期できません：' + (e && e.message ? e.message : e);
 }
@@ -838,16 +846,34 @@ async function writeFile() {
   catch (e) { setStatus('err', '⚠ ' + syncErr(e)); }
 }
 async function syncClick() {
-  if (!fileHandle) {
-    showBanner('まだデータファイルにつながっていません。最初に、どちらかを選んでください。', 'info', [['💾 保存先ファイルを作る（初めて）', saveAs], ['📂 ファイルを開く（作成済み）', openFile]]);
-    return;
-  }
+  if (!fileHandle) { showBanner('まだ保存先につながっていません。「保存先からデータをインポート」で、保存先ファイル（decision_tree.json）を選んでください。', 'info'); return; }
   try {
     if (!(await ensurePerm(fileHandle))) return;
     const r = await syncCore(true);
-    showBanner(r.pulled || r.pushed
-      ? '同期しました。ファイルの新しい内容を' + r.pulled + '件取り込み、この画面の新しい内容を' + r.pushed + '件ファイルに書きました。（件数はブロック数）'
-      : '同期しました。どちらも同じ内容でした。');
+    let msg = r.pulled || r.pushed ? '保存先と同期しました（取り込み ' + r.pulled + '件・書き出し ' + r.pushed + '件）。' : '保存先と同期しました（どちらも同じ内容）。';
+    let acts = null;
+    if (inboxHandle) {
+      const q = await inboxPull('quiet');
+      msg += q ? '　' + q : '';
+      if (!inboxHandle && canFile) acts = [['受け取りファイルを選ぶ', pickInbox]];
+    } else if (canFile) { msg += '　フローチャートからの受け取りファイル（decision_tree_inbox.json）は、まだ指定されていません。'; acts = [['受け取りファイルを選ぶ', pickInbox]]; }
+    showBanner(msg, 'info', acts);
+  } catch (e) { showBanner(syncErr(e), 'err'); }
+}
+async function pullClick() {
+  if (!fileHandle) return;
+  try {
+    if (!(await ensurePerm(fileHandle))) return;
+    const r = await syncCore(true, 'in'); render();
+    showBanner(r.pulled ? 'インポートしました。保存先の新しい内容を ' + r.pulled + '件取り込みました。' : 'インポートしました。保存先に、新しい内容はありませんでした。');
+  } catch (e) { showBanner(syncErr(e), 'err'); }
+}
+async function pushClick() {
+  if (!fileHandle) return;
+  try {
+    if (!(await ensurePerm(fileHandle))) return;
+    const r = await syncCore(true, 'out');
+    showBanner('エクスポートしました。保存先ファイル「' + fileName + '」に書きました。' + (r.pulled ? '（先に、保存先の新しい内容 ' + r.pulled + '件を取り込んでいます）' : ''));
   } catch (e) { showBanner(syncErr(e), 'err'); }
 }
 async function autoSync() {   // 他の端末での更新を、画面に戻ったときに取り込む（許可済みのときだけ・静かに）
@@ -856,7 +882,7 @@ async function autoSync() {   // 他の端末での更新を、画面に戻っ�
     if ((await fileHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') return;
     const r = await syncCore(false);
     if (r && r.pulled) showBanner('ほかの場所で更新された内容を、' + r.pulled + '件取り込みました。');
-  } catch (e) {}
+  } catch (e) { if (e && e.name === 'NotFoundError') showBanner(syncErr(e), 'err'); }
 }
 function idb() {
   return new Promise((res, rej) => {
@@ -867,6 +893,11 @@ function idb() {
 }
 async function idbGet(k) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('kv').objectStore('kv').get(k); t.onsuccess = () => res(t.result); t.onerror = () => rej(t.error); }); }
 async function idbSet(k, v) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite').objectStore('kv').put(v, k); t.onsuccess = () => res(); t.onerror = () => rej(t.error); }); }
+async function idbDel(k) { const db = await idb(); return new Promise(res => { const t = db.transaction('kv', 'readwrite').objectStore('kv').delete(k); t.onsuccess = () => res(); t.onerror = () => res(); }); }
+async function dropHandle(k) {   // 保存先の移動・名前変更でつながりが切れたとき：覚えていた場所を捨てて、選び直せるようにする
+  if (k === 'handle') { fileHandle = null; fileName = ''; fileDirty = false; clearTimeout(fileTimer); refreshBtns(); }
+  try { await idbDel(k); } catch (e) {}
+}
 async function ensurePerm(h) {
   const o = { mode: 'readwrite' };
   if ((await h.queryPermission(o)) === 'granted') return true;
@@ -896,24 +927,29 @@ async function openFile() {
     const [h] = await window.showOpenFilePicker({ types: jsonTypes, multiple: false });
     if (!(await ensurePerm(h))) return;
     const text = await (await h.getFile()).text();
-    if (text.trim() === '') { await connect(h); await writeFile(); refreshStatus(); return; }
+    if (text.trim() === '') {
+      if (showSampleNote) { loadData(emptyData()); showSampleNote = false; }
+      await connect(h); await writeFile(); refreshStatus(); showBanner('空のファイルを保存先にしました。'); return;
+    }
     if (!showSampleNote && !confirm('いま画面にある内容は、選んだファイルの内容に置き換わります。よろしいですか？')) return;
     const d = JSON.parse(text);
-    await connect(h); loadData(d);
+    await connect(h); loadData(d); showSampleNote = false;
     try { localStorage.setItem(LS_KEY, serialize()); } catch (e) {}
-    lastSaved = new Date(); refreshStatus(); showBanner('');
+    lastSaved = new Date(); refreshStatus(); showBanner('保存先「' + h.name + '」から、データを読み込みました。以後は、編集のたびに自動で保存先に書かれます。');
   } catch (e) { if (e && e.name !== 'AbortError') showBanner('ファイルを開けませんでした：' + (e.message || e), 'err'); }
 }
 async function saveAs() {
   try {
-    const h = await window.showSaveFilePicker({ suggestedName: 'law-tree.json', types: jsonTypes });
-    await connect(h); await writeFile(); showBanner('');
+    const h = await window.showSaveFilePicker({ suggestedName: 'decision_tree.json', types: jsonTypes });
+    try { const t0 = await (await h.getFile()).text(); if (t0.trim()) { showBanner('選んだファイル「' + h.name + '」には、すでに中身があります。上書きを防ぐため、止めました。このファイルを使うときは、「保存先からデータをインポート」を押してください。', 'err'); return; } } catch (e) {}
+    if (showSampleNote) { loadData(emptyData()); showSampleNote = false; }
+    await connect(h); await writeFile(); showBanner('新しい保存先「' + h.name + '」を作りました。');
   } catch (e) { if (e && e.name !== 'AbortError') showBanner('保存先を作れませんでした：' + (e.message || e) + '（「書き出し」は使えます）', 'err'); }
 }
 function exportFile() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([serialize()], { type: 'application/json' }));
-  a.download = 'law-tree.json'; document.body.appendChild(a); a.click(); a.remove();
+  a.download = 'decision_tree_backup_' + tsNow() + '.json'; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 function importFile(f) {
@@ -1006,7 +1042,7 @@ function exportCSV(scope) {
   const rows = buildRows(roots);
   const d = new Date(), p2 = n => String(n).padStart(2, '0');
   const stampStr = d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate());
-  const name = '判断ツリー_' + (scope === 'all' ? 'すべて' : (data.nodes[roots[0]].title || '無題').slice(0, 20)) + '_' + stampStr + '.csv';
+  const name = 'decision_tree_' + (scope === 'all' ? 'all' : 'view') + '_' + stampStr + '.csv';
   download(name, '﻿' + [CSV_HEAD].concat(rows).map(r => r.map(csvCell).join(',')).join('\r\n'), 'text/csv;charset=utf-8');
   showBanner('CSVを書き出しました（' + rows.length + '行）。Excelで開けます。この形式でAIに作ってもらった表も、そのまま取り込めます。');
 }
@@ -1084,12 +1120,14 @@ function ingestText(text, name) {
   } else rows = rowsFromCSV(parseCSV(t));
   return ingestRows(rows, source);
 }
-function afterIngest(res, label) {
-  if (res.added || res.skipped) { changed(); view = { type: 'map' }; selKey = null; editing = false; render(); }
+function afterIngest(res, label, quiet) {
+  if (res.added || res.skipped) { changed(); if (!quiet) { view = { type: 'map' }; selKey = null; editing = false; } render(); }
   const msg = res.added
-    ? label + '：' + res.added + '件を「暫定の置き場（未分類）」に入れました。「分野に入れる」で分野を決めてください。' + (res.skipped ? '（受け取り済み ' + res.skipped + '件は除きました）' : '')
+    ? label + '：' + res.added + '件を「未分類ツリー」に入れました。ドラッグして、分野に入れてください。' + (res.skipped ? '（受け取り済み ' + res.skipped + '件は除きました）' : '')
     : (res.skipped ? label + '：新しいものはありませんでした（受け取り済み ' + res.skipped + '件）。' : label + '：取り込めるものがありませんでした。');
-  showBanner(msg + (res.notes.length ? ' ※' + [...new Set(res.notes)].join('／') : ''), res.added || res.skipped ? 'info' : 'err');
+  const full = msg + (res.notes.length ? ' ※' + [...new Set(res.notes)].join('／') : '');
+  if (quiet) return full;
+  showBanner(full, res.added || res.skipped ? 'info' : 'err');
 }
 function importIngestFile(f) {
   if (!f) return;
@@ -1111,14 +1149,22 @@ async function pickInbox() {
 async function inboxPull(manual) {
   if (!inboxHandle) { if (manual) showBanner('受け取りファイルがまだ選ばれていません。「受け取りファイルを選ぶ」を押してください。', 'err'); return null; }
   try {
-    if (manual && !(await ensurePerm(inboxHandle))) return null;
+    if (manual && !(await ensurePerm(inboxHandle))) return manual === 'quiet' ? '受け取りファイルの許可がありませんでした。' : null;
     const f = await inboxHandle.getFile();
     if (!manual && f.lastModified === inboxMtime) return null;
     const text = await f.text(); inboxMtime = f.lastModified;
     const res = ingestText(text, f.name);
+    if (manual === 'quiet') return afterIngest(res, '受け取り「' + f.name + '」', true);
     if (manual || res.added) afterIngest(res, '受け取りファイル「' + f.name + '」');
     return res;
-  } catch (e) { if (manual) showBanner('受け取れませんでした：' + e.message, 'err'); return null; }
+  } catch (e) {
+    if (e && e.name === 'NotFoundError') {
+      inboxHandle = null; try { await idbDel('inboxHandle'); } catch (e2) {} try { renderTree(); } catch (e2) {}
+      const m = '受け取りファイルが見つかりません（移動・名前の変更でつながりが切れました）。「受け取りファイルを選ぶ」で、decision_tree_inbox.json を選び直してください。';
+      if (manual === 'quiet') return m; if (manual) showBanner(m, 'err', canFile ? [['受け取りファイルを選ぶ', pickInbox]] : []); return null;
+    }
+    if (manual === 'quiet') return '受け取れませんでした：' + e.message; if (manual) showBanner('受け取れませんでした：' + e.message, 'err'); return null;
+  }
 }
 async function autoInbox() {
   if (!inboxHandle || document.hidden) return;
@@ -1205,7 +1251,7 @@ function inboxTargets(id, q, rootId) {   // 置き先の候補（分野ツリー
   return out.slice(0, 80);
 }
 
-/* 配置ファイル：向こうから届いたブロックが、ツリーのどこに置かれたかを書いたファイル（DB配置.json） */
+/* 配置ファイル：向こうから届いたブロックが、ツリーのどこに置かれたかを書いたファイル（decision_tree_placement.json） */
 function buildPlacement() {
   const rows = [];
   const fieldOfRoot = rid => { const m = mapNodeFor(rid); return m ? fieldStrOf(m.id) : ''; };
@@ -1237,18 +1283,21 @@ async function writePlacement(auto) {   // auto＝編集のあとの自動書き
       if (auto) { if (!placeHandle || (await placeHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') return; }
       else if (placeHandle && !(await ensurePerm(placeHandle))) placeHandle = null;
       if (!placeHandle) {
-        placeHandle = await window.showSaveFilePicker({ suggestedName: 'DB配置.json', types: [{ description: '配置ファイル（JSON）', accept: { 'application/json': ['.json'] } }] });
+        placeHandle = await window.showSaveFilePicker({ suggestedName: 'decision_tree_placement.json', types: [{ description: '配置ファイル（JSON）', accept: { 'application/json': ['.json'] } }] });
         try { await idbSet('placeHandle', placeHandle); } catch (e) {}
       }
       const w = await placeHandle.createWritable(); await w.write(text); await w.close();
       placeLast = placeSig();
       if (!auto) showBanner('配置ファイル「' + placeHandle.name + '」に ' + n + '件を書きました。以後は、編集のあと自動で書き直します。');
-    } else if (!auto) { download('DB配置.json', text); showBanner('「DB配置.json」を保存しました（' + n + '件）。'); }
-  } catch (e) { if (!auto && e && e.name !== 'AbortError') showBanner('書き出せませんでした：' + e.message, 'err'); }
+    } else if (!auto) { download('decision_tree_placement.json', text); showBanner('「decision_tree_placement.json」を保存しました（' + n + '件）。'); }
+  } catch (e) {
+    if (e && e.name === 'NotFoundError') { placeHandle = null; try { await idbDel('placeHandle'); } catch (e2) {} if (!auto) showBanner('配置ファイルが見つかりません（移動・名前の変更でつながりが切れました）。もう一度「配置ファイルを書き出す」を押して、decision_tree_placement.json を選び直してください。', 'err'); return; }
+    if (!auto && e && e.name !== 'AbortError') showBanner('書き出せませんでした：' + e.message, 'err');
+  }
 }
 function autoPlacement() { if (!placeHandle || restoring || !data) return; if (placeSig() === placeLast) return; writePlacement(true); }
 
-/* 説明文（使い方.txt・AIへの指示文に使う） */
+/* 説明文（decision_tree_usage.txt・AIへの指示文に使う） */
 const CSV_SPEC = `【取り込み用の表（CSV）の書き方】
 
 ■ 基本
@@ -1309,8 +1358,8 @@ ${CSV_SPEC}
 const USAGE_TXT = `判断ロジックツリー　使い方メモ
 
 ■ データの置き場所
-・アプリ本体（decisions.html）は GitHub に置き、書いた内容は、あなたのGoogleドライブの Tree.json にだけ保存されます（GitHubには入りません）。
-・「💾 保存先ファイルを作る」で Tree.json を作ると、編集のたびに自動で同期されます。別の端末で更新したときは、「🔄 同期」で新しい方が採用されます。
+・アプリ本体（decisions.html）は GitHub に置き、書いた内容は、あなたのGoogleドライブの decision_tree.json にだけ保存されます（GitHubには入りません）。
+・「💾 保存先ファイルを作る」で decision_tree.json を作ると、編集のたびに自動で同期されます。別の端末で更新したときは、「🔄 同期」で新しい方が採用されます。
 
 ■ 資料からツリーを作る流れ（Vflat・NotebookLM → AI → CSV → ツリー）
 1. 論証集のBランク以降は、Vflat で撮影して文字起こしする（テキストをコピー）。判例百選は、NotebookLM にまとめてもらったテキストを使う。
@@ -1318,14 +1367,14 @@ const USAGE_TXT = `判断ロジックツリー　使い方メモ
 3. Claudeなどに、コピーした指示文を貼り、最後の【素材】の下に、1.のテキストを貼って送る。
 4. 返ってきたCSV（コードブロックの中身）を、メモ帳などに貼って、「〇〇.csv」として保存する（文字コードはUTF-8）。
 5. 「⇅ CSV・AI」→「CSV・受け渡しファイルを取り込む」で、そのファイルを選ぶ。
-6. 取り込んだものは、分野ツリーの下の「📥 暫定の置き場（未分類）」に入る。ブロックの「分野に入れる」を押し、右の「◀ 組み方」欄で、既にある分野を選ぶ（新しい分野名を入れて作ることもできる）。すると、そのまとまりは、その分野の「📥 この分野の暫定の置き場」に移る。
+6. 取り込んだものは、分野ツリーの下の「📥 未分類ツリー（）」に入る。ブロックの「分野に入れる」を押し、右の「◀ 組み方」欄で、既にある分野を選ぶ（新しい分野名を入れて作ることもできる）。すると、そのまとまりは、その分野の「📥 この分野の暫定の置き場」に移る。
 7. その分野のツリーを開き、置き場のブロックの「置き場所を決める」で、その分野のツリーの中のどこかの下につなぐ（その分野にツリーが無いときは、最上位のツリーにする）。
 ・取り込みでは、既存のブロックは上書きされません（必ず新しいブロックとして入ります）。
 ・うまくいかないときは、AIに「この行の親の指定が違う」などと伝えて、CSVを直してもらってください。
 
 ■ ツリーをCSVで書き出す
 ・「⇅ CSV・AI」→「表示中の分野ツリーをCSVで」または「すべてをCSVで」。Excelで開けます。AIに「この表を直して」と渡して、また取り込むこともできます（取り込みは新しいブロックとして入るので、直したものを取り込んだら、古い方は削除してください）。
-・CSVには、ブロックの名前・つながり・位置づけ・組み方・趣旨・具体例・分野が入ります。重ね表示の「対応」の設定などは入りません。完全なバックアップは、「⬇ 書き出し」（JSON）か、Tree.json を使ってください。
+・CSVには、ブロックの名前・つながり・位置づけ・組み方・趣旨・具体例・分野が入ります。重ね表示の「対応」の設定などは入りません。完全なバックアップは、「⬇ 書き出し」（JSON）か、decision_tree.json を使ってください。
 
 ${CSV_SPEC}
 ■ 別ページ（論証フローチャート）との受け渡し
@@ -1334,7 +1383,7 @@ ${CSV_SPEC}
 
 ・向こうで直して送り直したブロックは、置き場に「更新版」として届きます。ブロックを選ぶと右の欄に「前の版と入れ替える」が出て、同じ場所に入れ替わります（前の版にこちらで書き足した内容は移りません）。
 ・向こうの「判断」「要件」「括弧（グループ）」「趣旨」にも対応しています（括弧は「括弧」の印が付いたブロックになります）。向こうのカードに、データベースのブロックから戻るには、ブロックを選んで右の欄の「論証フローチャートで開く」を押します（最初の1回だけ、向こうのページのアドレスを聞かれます）。向こうから、このツリーの該当ブロックを開くリンク（decisions.html#node=…）も使えます。
-・分野に入れた・置いたブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（stage＝分野のみ／配置済み、分野名、ツリー上の道すじ。判断・要件・括弧・趣旨のそれぞれのid）を書いたファイル（DB配置.json）にできます。初回に保存先を選ぶと、以後は編集のあと自動で書き直します。向こうのページが読むためのものです（未分類のものは書きません）。
+・分野に入れた・置いたブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（stage＝分野のみ／配置済み、分野名、ツリー上の道すじ。判断・要件・括弧・趣旨のそれぞれのid）を書いたファイル（decision_tree_placement.json）にできます。初回に保存先を選ぶと、以後は編集のあと自動で書き直します。向こうのページが読むためのものです（未分類のものは書きません）。
 
 ■ 主な操作
 ・ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（ダブルクリック、F2）＝編集。Esc＝編集を終える。
@@ -1411,7 +1460,8 @@ function addSibling(path, dir) {
   const id = path[path.length - 1], nid = uid();
   data.nodes[nid] = newNode(nid, '');
   if (path.length === 1) {
-    if (data.nodes[id].home || data.nodes[id].inbox) { data.nodes[nid].home = true; afterCreate(nid); return; }
+    if (data.nodes[id].inbox) { data.nodes[nid].inbox = true; if (data.nodes[id].ifld) data.nodes[nid].ifld = data.nodes[id].ifld; afterCreate(nid); return; }
+    if (data.nodes[id].home) { data.nodes[nid].home = true; afterCreate(nid); return; }
     const i = data.roots.indexOf(id);
     if (i < 0) data.roots.push(nid); else data.roots.splice(dir < 0 ? i : i + 1, 0, nid);
     afterCreate(nid); return;
@@ -1425,8 +1475,9 @@ function addUp(path) {   // 親で包む：このブロックを子にする新�
   const id = path[path.length - 1], nid = uid();
   const N = newNode(nid, ''); N.kids = [{ id, role: 'req', w: '', tier: '' }]; data.nodes[nid] = N;
   if (path.length === 1) {
-    const i = data.roots.indexOf(id);
-    if (data.nodes[id].home) { N.home = true; delete data.nodes[id].home; }
+    const i = data.roots.indexOf(id), o = data.nodes[id];
+    if (o.home) { N.home = true; delete o.home; }
+    else if (o.inbox) { N.inbox = true; if (o.ifld) N.ifld = o.ifld; clearInboxMark(o); }
     else if (i >= 0) data.roots[i] = nid; else data.roots.push(nid);
   } else {
     data.nodes[path[path.length - 2]].kids.find(k => k.id === id).id = nid;
@@ -1442,6 +1493,7 @@ function outdent(path) { // 一階層上に作る：親の隣（親の次）に�
   const nid = uid(); data.nodes[nid] = newNode(nid, '');
   const parentId = path[path.length - 2];
   if (path.length === 2) {
+    if (data.nodes[parentId].inbox) { data.nodes[nid].inbox = true; if (data.nodes[parentId].ifld) data.nodes[nid].ifld = data.nodes[parentId].ifld; afterCreate(nid); return; }
     if (data.nodes[parentId].home) { data.nodes[nid].home = true; afterCreate(nid); return; }
     const i = data.roots.indexOf(parentId);
     if (i < 0) data.roots.push(nid); else data.roots.splice(i + 1, 0, nid);
@@ -1678,8 +1730,45 @@ function moveBlock(srcPath, tpath, zone, shift) {
 }
 function dndHint(t) { const h = $('#dndHint'); h.textContent = t || ''; h.style.display = t ? 'block' : 'none'; }
 function clearDz() { document.querySelectorAll('.row.dz-into,.row.dz-before,.row.dz-after').forEach(r => r.classList.remove('dz-into', 'dz-before', 'dz-after')); }
+function inboxDropOk(id, tpath, row, e) {   // 置き場のブロックを、ここに落とせるか
+  const top = data.nodes[tpath[0]], tid = tpath[tpath.length - 1], t = data.nodes[tid];
+  if (!top || !t || top.inbox || id === tid) return { ok: false };
+  if (top.home) {   // 分野ツリー（地図）：分野名に落とす
+    if (tpath.length < 2 || t.home) return { ok: false };
+    if (!(fieldRootOf(t) || !t.kids.length)) return { ok: false, msg: 'ここは、分野の見出しです。分野名（ツリーを開く行）に落としてください' };
+    return { ok: true, zone: 'into', hint: fieldRootOf(t) ? '「' + fieldStrOf(tid) + '」の未接続ツリーに入ります' : '「' + fieldStrOf(tid) + '」の最上位のツリーになります' };
+  }
+  const zone = dropZone(e, row, tpath), np = zone === 'into' ? tid : tpath[tpath.length - 2];
+  if (!np || !data.nodes[np] || data.nodes[np].home || data.nodes[np].inbox || id === np || reaches(id, np)) return { ok: false };
+  return { ok: true, zone, hint: zone === 'into' ? '「' + (t.title || '無題') + '」の中（末尾の子）に置きます' : zone === 'before' ? '「' + (t.title || '無題') + '」の前に置きます' : '「' + (t.title || '無題') + '」の後ろに置きます' };
+}
+function doInboxDrop(id, tpath, zone) {
+  const top = data.nodes[tpath[0]], tid = tpath[tpath.length - 1], t = data.nodes[tid], n = data.nodes[id];
+  if (!n || !t) return;
+  commitHistory();
+  if (top.home) { if (fieldRootOf(t)) assignField(id, tid); else placeAsTop(id, tid); commitHistory(); return; }
+  const np = zone === 'into' ? tid : tpath[tpath.length - 2], P = data.nodes[np];
+  clearInboxMark(n);
+  const nl = { id, role: 'req', w: '', tier: '' };
+  if (zone === 'into') P.kids.push(nl);
+  else { const j = P.kids.findIndex(k => k.id === tid); P.kids.splice(zone === 'before' ? j : j + 1, 0, nl); }
+  const parentPath = zone === 'into' ? tpath : tpath.slice(0, -1);
+  expanded.add(parentPath.join('>')); selKey = parentPath.concat(id).join('>'); editing = false;
+  changed(); commitHistory(); render();
+  const sel = document.querySelector('#tree .row.sel'); if (sel) sel.scrollIntoView({ block: 'nearest' });
+  showBanner('「' + (n.title || '無題') + '」を、ツリーにつなぎました。');
+}
 function wireDnd(row, myPath, cyc, isEdit) {
   if (cyc) return;
+  if (myPath.length === 1 && !isEdit && data.nodes[myPath[0]] && data.nodes[myPath[0]].inbox) {   // 置き場のブロックは、分野・ツリーへ落とせる
+    row.draggable = true;
+    row.addEventListener('dragstart', e => {
+      dragSrc = { inbox: true, id: myPath[0], key: myPath[0], path: myPath.slice() };
+      e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', myPath[0]);
+      row.classList.add('dragging');
+    });
+    row.addEventListener('dragend', () => { dragSrc = null; row.classList.remove('dragging'); clearDz(); dndHint(''); });
+  }
   if (myPath.length > 1 && !isEdit) {   // 最上位のブロック（分野・置き場）は、動かさない
     row.draggable = true;
     row.addEventListener('dragstart', e => {
@@ -1691,6 +1780,11 @@ function wireDnd(row, myPath, cyc, isEdit) {
   }
   row.addEventListener('dragover', e => {
     if (!dragSrc) return;
+    if (dragSrc.inbox) {
+      const r = inboxDropOk(dragSrc.id, myPath, row, e); clearDz();
+      if (!r.ok) { dndHint(r.msg || 'ここには置けません'); return; }
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move'; row.classList.add('dz-' + r.zone); dndHint(r.hint); return;
+    }
     const zone = dropZone(e, row, myPath), ok = canDrop(dragSrc.path, myPath, zone, e.shiftKey);
     clearDz();
     if (!ok) { dndHint('ここには移せません'); return; }
@@ -1701,6 +1795,12 @@ function wireDnd(row, myPath, cyc, isEdit) {
   row.addEventListener('dragleave', e => { if (!row.contains(e.relatedTarget)) row.classList.remove('dz-into', 'dz-before', 'dz-after'); });
   row.addEventListener('drop', e => {
     if (!dragSrc) return;
+    if (dragSrc.inbox) {
+      e.preventDefault(); const r = inboxDropOk(dragSrc.id, myPath, row, e), id = dragSrc.id;
+      clearDz(); dndHint(''); dragSrc = null;
+      if (r.ok) doInboxDrop(id, myPath, r.zone);
+      return;
+    }
     e.preventDefault();
     const zone = dropZone(e, row, myPath), src = dragSrc.path;
     clearDz(); dndHint('');
@@ -1749,9 +1849,7 @@ function nodeLi(id, link, path, bi) {
   if (!link && n.inbox && !cyc) {
     const fnode = ifldNode(n);
     if (fnode && view.type === 'map') row.appendChild(el('span', 'cnt', '分野：' + (fieldStrOf(fnode.id) || '無題')));
-    const pb = el('button', 'sm', fnode ? '置き場所を決める ▸' : '分野に入れる ▸');
-    pb.onclick = e => { e.stopPropagation(); selKey = key; editing = false; prefs.panel = true; savePrefs(); render(); };
-    row.appendChild(pb);
+    const gh = el('span', 'cnt', '⠿ つかんで落とす'); gh.title = 'このブロックをつかんで、' + (view.type === 'map' ? '分野ツリーの分野名' : 'ツリーの好きな場所') + 'に落とします'; row.appendChild(gh);
   }
   if (jumpOk) row.appendChild(el('span', 'jump', '↗ ' + (data.nodes[n.jump].title || '無題')));
   if (n.sid && n.ssrc === 'flowchart' && !isEdit && !cyc) { const rb = el('button', 'ichip', '論証 ↗'); rb.title = '論証フローチャートで、元のカードを開く'; rb.onclick = e => { e.stopPropagation(); openInRonsho(n.sid); }; row.appendChild(rb); }
@@ -2022,7 +2120,7 @@ function renderTree() {
   (view.type === 'map' ? roots.filter(r => data.nodes[r].home) : roots.filter(r => !data.nodes[r].inbox)).forEach(id => ul.appendChild(nodeLi(id, null, [], null)));
   box.appendChild(ul);
   if (view.type === 'map') box.appendChild(inboxSection());
-  else { const pend = fieldPendingIds(view.rootId); if (pend.length) box.appendChild(fieldInboxSection(pend)); }
+  else if (data.nodes[view.rootId] && !data.nodes[view.rootId].inbox) box.appendChild(fieldInboxSection(fieldPendingIds(view.rootId)));
   if (view.type === 'map') {
     const jumped = new Set(Object.values(data.nodes).map(n => n.jump).filter(Boolean));
     const nr = data.roots.filter(r => data.nodes[r] && !jumped.has(r));
@@ -2046,35 +2144,43 @@ function renderTree() {
   { const n = inboxIds().length; $('#btnHome').textContent = '🏠 分野ツリー' + (n ? '（📥' + n + '）' : ''); }
   $('#btnRoot').textContent = view.type === 'map' ? '＋分野を追加' : '＋新しいツリー';
 }
+function addInboxTop(ifld) {   // 未分類／未接続のエリアに、新しい空のツリーを足して、そのまま書き込む
+  const nid = uid(), n = newNode(nid, ''); n.inbox = true; if (ifld) n.ifld = ifld; data.nodes[nid] = n;
+  selKey = nid; editing = true; wantFocus = true; changed(); render();
+  const s = document.querySelector('#tree .row.sel'); if (s) s.scrollIntoView({ block: 'nearest' });
+}
 function inboxSection() {
   const ids = unsortedIds(), wrap = el('div', 'inboxsec');
   const h = el('div', 'inboxh');
-  h.appendChild(el('b', null, '📥 暫定の置き場（未分類 ' + ids.length + '件）'));
+  h.appendChild(el('b', null, '📥 未分類ツリー（' + ids.length + '件）'));
   const bs = el('span', 'inboxb');
   const add = (tx, f, tip) => { const b = el('button', 'sm', tx); if (tip) b.title = tip; b.onclick = f; bs.appendChild(b); };
-  if (canFile) add('受け取りファイルを選ぶ', pickInbox, '別ページが「送信」で書き出したファイル（Googleドライブ内）を選ぶ');
-  if (inboxHandle) add('今すぐ受け取る', () => inboxPull(true));
+  add('＋ツリーを書き込む', () => addInboxTop(null), 'ここに、判断・要件のツリーを直接書きます');
+  if (canFile && !inboxHandle) add('受け取りファイルを選ぶ', pickInbox, 'フローチャート側が「送信」で書き出したファイル（Googleドライブ内の decision_tree_inbox.json）を選ぶ。選んだあとは「🔄 同期」で自動で読み込まれます');
   add('CSV・受け渡しファイルを取り込む', () => $('#csvIn').click());
-  add('受け取り履歴を消す', () => { if (confirm('「受け取り済み」の記録を消します。受け取りファイルの中身は、次回また最初から取り込まれます。よろしいですか？')) { data.seen = {}; changed(); showBanner('受け取り履歴を消しました。'); } }, '消した置き場のブロックを、もう一度受け取りたいとき');
+  add('受け取り履歴を消す', () => { if (confirm('「受け取り済み」の記録を消します。受け取りファイルの中身は、次回また最初から取り込まれます。よろしいですか？')) { data.seen = {}; changed(); showBanner('受け取り履歴を消しました。'); } });
   h.appendChild(bs); wrap.appendChild(h);
-  if (!ids.length) wrap.appendChild(el('div', 'hint', 'いま、未分類のものはありません。CSV・受け渡しファイルを取り込むと、ここに入ります。'));
-  else {
-    wrap.appendChild(el('div', 'hint', 'ブロックの「分野に入れる」を押すと、右の欄で分野を選べます。選ぶと、その分野の「この分野の暫定の置き場」に移ります。'));
-    const ul = el('ul', 'roots'); ids.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul);
-  }
+  wrap.appendChild(el('div', 'hint', ids.length
+    ? 'ブロックをつかんで、上の分野ツリーの分野名（例：刑事訴訟法）に落とすと、その分野に入ります。分野にまだツリーが無ければ、そのツリーの最上位になります。'
+    : 'いま、未分類のものはありません。「＋ツリーを書き込む」で直接書くか、「🔄 同期」やCSVの取り込みをすると、ここに入ります。'));
+  if (ids.length) { const ul = el('ul', 'roots'); ids.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul); }
   const nt = noTreePendingIds();
   if (nt.length) {
-    wrap.appendChild(el('div', 'hint', '分野だけ決めたもの（その分野のツリーが、まだありません）：「置き場所を決める」で、最上位のツリーにできます。'));
+    wrap.appendChild(el('div', 'hint', '分野だけ決めたもの（その分野のツリーが、まだありません）：同じ分野名にもう一度ドラッグして落とすと、その分野の最上位のツリーになります。'));
     const ul = el('ul', 'roots'); nt.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul);
   }
   return wrap;
 }
 function fieldInboxSection(ids) {
   const wrap = el('div', 'inboxsec'), h = el('div', 'inboxh');
-  h.appendChild(el('b', null, '📥 この分野の暫定の置き場（' + ids.length + '件）'));
+  h.appendChild(el('b', null, '📥 未接続ツリー（' + ids.length + '件）'));
+  const m = mapNodeFor(view.rootId);
+  if (m) { const bs = el('span', 'inboxb'), b = el('button', 'sm', '＋ツリーを書き込む'); b.title = 'ここに、判断・要件のツリーを直接書きます'; b.onclick = () => addInboxTop(m.id); bs.appendChild(b); h.appendChild(bs); }
   wrap.appendChild(h);
-  wrap.appendChild(el('div', 'hint', 'ブロックの「置き場所を決める」を押すと、右の欄で、この分野のツリーの中のどこかの下に置けます。'));
-  const ul = el('ul', 'roots'); ids.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul);
+  wrap.appendChild(el('div', 'hint', ids.length
+    ? 'ブロックをつかんで、上のツリーの好きな場所に落とすと、つながります（行の上端＝その前／下端＝その後ろ／中央＝その中）。'
+    : (m ? 'この分野の、まだどこにもつながっていないツリーが、ここに入ります。「＋ツリーを書き込む」で直接書くこともできます。' : 'このツリーは、分野ツリーに未登録です。')));
+  if (ids.length) { const ul = el('ul', 'roots'); ids.forEach(id => ul.appendChild(nodeLi(id, null, [], null))); wrap.appendChild(ul); }
   return wrap;
 }
 function expandTo(d) {
@@ -2123,7 +2229,7 @@ function renderPanel() {
   const isMap = view.type === 'map' && !n.inbox && !(data.nodes[path[0]] && data.nodes[path[0]].inbox);
   if (path.length === 1 && n.inbox) {
     const fnode = ifldNode(n), froot = fieldRootOf(fnode);
-    P.appendChild(el('div', 'sec', fnode ? '置き場所を決める（分野：' + (fieldStrOf(fnode.id) || '無題') + '）' : '分野に入れる（未分類）'));
+    P.appendChild(el('div', 'sec', fnode ? '未接続ツリー（分野：' + (fieldStrOf(fnode.id) || '無題') + '）' : '未分類ツリー'));
     if (n.prev && data.nodes[n.prev]) {
       const po = data.nodes[n.prev], pp = findPath(n.prev);
       P.appendChild(el('div', 'hint', '★ これは、以前に取り込んだ「' + (po.title || '無題') + '」' + (pp ? '（' + pp.map(i => data.nodes[i].title || '無題').join(' › ') + '）' : '') + 'を、向こうで直して送り直したものです。'));
@@ -2137,28 +2243,30 @@ function renderPanel() {
       tb.onclick = () => placeUnder(id, n.ptarget, 'req');
       P.appendChild(tb);
     }
+    P.appendChild(el('div', 'hint', 'このブロックは、左の枠からドラッグして、' + (fnode ? 'ツリーの好きな場所' : '分野ツリーの分野名') + 'に落とします（右の欄では操作しません）。'));
+    const Q = el('details'); Q.appendChild(el('summary', null, 'ドラッグできないとき（スマホなど）の置き方')); P.appendChild(Q);
     // ② 分野に入れる（分野のみのときは「分野を変える」）
-    P.appendChild(el('div', 'hint', fnode ? '分野を変えるとき：' : '既にある分野から選ぶか、新しい分野名を入れます。入れると、このまとまりは、その分野の暫定の置き場に移ります（分野ツリーの中には、まだつなぎません）。'));
+    Q.appendChild(el('div', 'hint', fnode ? '分野を変えるとき：' : '既にある分野から選ぶか、新しい分野名を入れます。入れると、このまとまりは、その分野の暫定の置き場に移ります（分野ツリーの中には、まだつなぎません）。'));
     const fs = el('select'); const f0 = el('option', null, '（既にある分野から選ぶ）'); f0.value = ''; fs.appendChild(f0);
     fieldList().forEach(x => { const o = el('option', null, x.label); o.value = x.id; if (fnode && fnode.id === x.id) o.selected = true; fs.appendChild(o); });
-    P.appendChild(fs);
+    Q.appendChild(fs);
     const fi = el('input'); fi.type = 'text'; fi.value = ''; fi.placeholder = '新しい分野名（例：民法　または　法律/民法）' + (n.fld ? '　向こうの案：' + n.fld : ''); fi.style.marginTop = '6px';
-    P.appendChild(fi);
+    Q.appendChild(fi);
     const fb = el('button', 'sm', fnode ? 'この分野に変える' : 'この分野に入れる'); fb.style.marginTop = '6px';
     fb.onclick = () => {
       const name = fi.value.trim(), mid = name ? ensureFieldPath(name) : fs.value;
       if (!mid) { showBanner('分野を選ぶか、新しい分野名を入れてください。', 'err'); return; }
       assignField(id, mid);
     };
-    P.appendChild(fb);
+    Q.appendChild(fb);
     if (fnode) {
       const bk = el('button', 'sm', '未分類にもどす'); bk.style.cssText = 'margin:6px 0 0 6px';
       bk.onclick = () => { delete n.ifld; changed(); render(); showBanner('未分類にもどしました。'); };
-      P.appendChild(bk);
+      Q.appendChild(bk);
       // ③ 分野の中に置く
-      P.appendChild(el('div', 'hint', 'この分野のツリーの中に置く：'));
+      Q.appendChild(el('div', 'hint', 'この分野のツリーの中に置く：'));
       if (froot) {
-        P.appendChild(el('div', 'hint', '置き先の名前の一部で探します（この分野のツリーの中だけ。空欄なら全部）。'));
+        Q.appendChild(el('div', 'hint', '置き先の名前の一部で探します（この分野のツリーの中だけ。空欄なら全部）。'));
         const q = el('input'); q.type = 'search'; q.placeholder = '置き先の名前の一部（例：窃取）';
         const sel = el('select'); sel.size = 5; sel.style.marginTop = '6px';
         const rs = el('select'); [['req', '要件として'], ['exc', 'ただし（例外）として'], ['?', '未設定で']].forEach(([v, tx]) => { const o = el('option', null, tx); o.value = v; rs.appendChild(o); });
@@ -2172,12 +2280,12 @@ function renderPanel() {
         };
         q.oninput = fill; fill();
         pb.onclick = () => { if (!sel.value) { showBanner('置き先を選んでください。', 'err'); return; } placeUnder(id, sel.value, rs.value); };
-        P.append(q, sel, rs, pb);
+        Q.append(q, sel, rs, pb);
       } else {
-        P.appendChild(el('div', 'hint', 'この分野には、まだツリーがありません。このまとまりを、その分野の最上位のツリーにできます。'));
+        Q.appendChild(el('div', 'hint', 'この分野には、まだツリーがありません。このまとまりを、その分野の最上位のツリーにできます。'));
         const tb = el('button', 'sm', 'この分野の最上位のツリーにする');
         tb.onclick = () => placeAsTop(id, fnode.id);
-        P.appendChild(tb);
+        Q.appendChild(tb);
       }
     }
   }
@@ -2369,22 +2477,29 @@ $('#ioImport').onclick = () => $('#csvIn').click();
 $('#ioExpView').onclick = () => { $('#ioDlg').close(); exportCSV('view'); };
 $('#ioExpAll').onclick = () => { $('#ioDlg').close(); exportCSV('all'); };
 $('#ioPlace').onclick = () => { $('#ioDlg').close(); writePlacement(); };
-$('#ioUsage').onclick = () => download('使い方.txt', USAGE_TXT);
+$('#ioUsage').onclick = () => download('decision_tree_usage.txt', USAGE_TXT);
 $('#ioInbox').onclick = () => { $('#ioDlg').close(); openMap(); };
 $('#ioCopyPrompt').onclick = async () => {
   try { await navigator.clipboard.writeText(AI_PROMPT); showBanner('AIに渡す指示文をコピーしました。Claudeなどに貼り付け、【素材】の下に、文字起こしやまとめを貼って送ってください。'); }
-  catch (e) { download('AIへの指示文.txt', AI_PROMPT); showBanner('コピーできなかったので、「AIへの指示文.txt」を保存しました。中身をAIに貼ってください。'); }
+  catch (e) { download('decision_tree_ai_prompt.txt', AI_PROMPT); showBanner('コピーできなかったので、「decision_tree_ai_prompt.txt」を保存しました。中身をAIに貼ってください。'); }
   $('#ioDlg').close();
 };
 $('#btnUndo').onclick = undo;
 $('#btnRedo').onclick = redo;
 $('#panelTab').onclick = togglePanel;
-$('#btnOpen').onclick = openFile;
+$('#btnImpFile').onclick = openFile;
 $('#btnSync').onclick = syncClick;
+$('#btnPull').onclick = pullClick;
+$('#btnPush').onclick = pushClick;
 window.addEventListener('focus', autoSync);
 window.addEventListener('focus', autoInbox);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { autoSync(); autoInbox(); } });
 $('#btnSaveAs').onclick = saveAs;
+$('#btnReconnect').onclick = async () => {
+  if (!fileHandle) { showBanner('いまは、保存先につながっていません。上の「📂 保存先からデータをインポート」で選んでください。', 'info'); return; }
+  if (!confirm('いまの保存先とのつながりを外します（データは消えません）。外したあと、「保存先からデータをインポート」で、保存先ファイルを選び直してください。よろしいですか？')) return;
+  await dropHandle('handle'); render(); showBanner('つながりを外しました。上の「📂 保存先からデータをインポート」で、保存先ファイル（decision_tree.json）を選んでください。');
+};
 $('#btnExport').onclick = exportFile;
 $('#btnImport').onclick = () => $('#fileIn').click();
 $('#btnClear').onclick = clearAll;
@@ -2437,14 +2552,17 @@ document.addEventListener('keydown', e => {
   if (runAction(act.id)) e.preventDefault();
 });
 window.addEventListener('beforeunload', e => { if (fileHandle && fileDirty) { e.preventDefault(); e.returnValue = ''; } });
-if (!canFile) { $('#btnOpen').hidden = true; $('#btnSaveAs').hidden = true; $('#btnSync').hidden = true; }
+if (!canFile) {
+  ['btnImpFile', 'btnSync', 'btnPull', 'btnPush', 'btnSaveAs', 'btnReconnect'].forEach(i => { $('#' + i).hidden = true; });
+  const hb = $('.btns'); ['btnImport', 'btnExport'].forEach(i => { const b = $('#' + i); b.classList.remove('sm'); hb.insertBefore(b, $('#fileIn')); });
+}
 
 (async function init() {
   let loaded = false;
   try { const s = localStorage.getItem(LS_KEY); if (s) { data = normalize(JSON.parse(s)); loaded = true; } } catch (e) {}
   if (!loaded) { data = sampleData(); showSampleNote = true; }
   ensureHome(); initView(); resetSnap(); resetHistory(); applyPanel();
-  render(); applyHash(false);
+  render(); applyHash(false); refreshBtns();
   if (!canFile) {
     showBanner('このブラウザではファイルへの自動保存は使えません（PCのChrome・Edgeで開いてください）。今はブラウザ内に保存され、「書き出し」でファイルにできます。');
     applyHash(true); return;
