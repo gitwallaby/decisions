@@ -216,7 +216,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611202315</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611221042</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
@@ -236,7 +236,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <p><b>分野ツリー（ホーム画面）</b>：左上の「🏠 分野ツリー」が、分野の一覧（地図）です。分野名をクリックすると、その分野のツリーだけが表示されます。分野の追加・並べ替えは、分野ツリーの中で、ふつうのブロックと同じように行えます。分野名のブロックに「開くツリー」を設定すると、ジャンプ先になります（右の「◀ 組み方」欄）。</p>
   <p><b>ドラッグで位置を変える</b>：ブロックをつかんで、別のブロックの上端（前に置く）・下端（後ろに置く）・中央（中に入れる）に落とします。そのままだと下のブロックごと動き、<kbd>Shift</kbd>を押しながら落とすと、そのブロックだけが動いて、下のブロックはひとつ上の階層に上がります。分野の最上位のブロックは動かせません。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で戻せます。</p>
   <p><b>コピー・切り取り・貼り付け／取り消し</b>：ブロックを選んで <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>X</kbd>／<kbd>V</kbd>（貼り付けは、選んだブロックの下に入ります）。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で元に戻し、<kbd>Ctrl</kbd>+<kbd>Y</kbd>でやり直し。キーは「⌨ キー設定」で変えられます。</p>
-  <p><b>ブロックを作る</b>：<kbd>Enter</kbd>＝下、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝上、<kbd>Tab</kbd>＝右（一階層下）、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝左（一階層上）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
+  <p><b>ブロックを作る</b>：ブロックを選んでいる（編集中でない）とき、<kbd>Enter</kbd>＝同じ階層の下に追加、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝同じ階層の上に追加、<kbd>Tab</kbd>＝一階層下に追加、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝一階層上に追加。名前を編集している間は、<kbd>Enter</kbd>＝名前を確定（ブロックは増えません）。最上位の判断を選んで <kbd>Enter</kbd> を押すと、同じ分野の、もう1つの最上位の判断が並びます（「＋最上位の判断を追加」でも追加できます）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
   <p><b>要件の組み方</b>：「すべて必要」は青の太い線で束ねて①②③。「どれか1つ」は橙色でA・B・C。「総合考慮」は紫色で、ウェイトと優先度（一次的・副次的・補充的）を書けます。</p>
   <p><b>枠組みの重ね表示</b>：枠組みを重ねたブロックは、ツリー全体の背景に枠組みの色が付き、下に「枠組み：〇〇」の帯が出ます。帯をクリックするとチェック表が開き、各要件がどの要素に対応しているか（未対応はどれか）が分かります。対応は、編集モードの詳細欄「枠組みとの対応」で選びます。</p>
   <p><b>保存先・バックアップ</b>：<button id="btnSaveAs" class="sm" title="空の新しいファイルを保存先にします。すでに中身のあるファイルは選べません">💾 新しい保存先ファイルを作る（初めてだけ）</button> <button id="btnReconnect" class="sm" title="保存先ファイルを移動・名前変更したときに、つなぎ直す">🔌 保存先を選び直す</button> <button id="btnExport" class="sm" title="データをファイルとしてダウンロード">⬇ 書き出し（バックアップ）</button> <button id="btnImport" class="sm" title="書き出したファイルを読み込む">⬆ 読み込み</button> <button id="btnSamples" class="sm" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button></p>
@@ -353,6 +353,7 @@ function normalize(d) {
   }
   for (const [id, n] of Object.entries(d.nodes)) {   // 分野ツリーからのジャンプ先
     if (out.nodes[id] && typeof n.jump === 'string' && out.nodes[n.jump]) out.nodes[id].jump = n.jump;
+    if (out.nodes[id] && typeof n.peer === 'string' && n.peer !== id && out.nodes[n.peer]) out.nodes[id].peer = n.peer;   // 同じ分野に並べた、もう1つの最上位の判断（peer＝代表の最上位）
   }
   for (const [id, n] of Object.entries(d.nodes)) {   // 要件と枠組み要素の対応
     if (!out.nodes[id] || !n.maps || typeof n.maps !== 'object') continue;
@@ -454,16 +455,39 @@ function ifldNode(n) {   // このまとまりを入れてある分野（分野�
   const p = findPath(f.id); return p && p.length > 1 && data.nodes[p[0]] && data.nodes[p[0]].home ? f : null;
 }
 const fieldRootOf = f => (f && f.jump && data.nodes[f.jump] ? f.jump : null);
+/* 1つの分野に、最上位の判断を複数並べられる：先頭の1つ（代表）を分野ツリーの jump が指し、残りは peer で代表を指す */
+const fieldPrimary = id => { const n = data.nodes[id]; return n && n.peer && data.nodes[n.peer] && !data.nodes[n.peer].peer ? n.peer : id; };
+const peersOf = pid => data.roots.filter(r => r !== pid && data.nodes[r] && data.nodes[r].peer === pid);
+const fieldRoots = id => { const p = fieldPrimary(id); return data.nodes[p] ? [p].concat(peersOf(p)) : []; };
+function adoptRootRole(oldId, newId) {   // newId が、oldId に代わって、その分野の最上位（代表／仲間）の役を引き継ぐ
+  const o = data.nodes[oldId], n = data.nodes[newId]; if (!n) return;
+  Object.values(data.nodes).forEach(x => { if (x.jump === oldId) x.jump = newId; if (x.peer === oldId && x.id !== newId) x.peer = newId; });
+  if (o && o.peer && o.peer !== newId) { n.peer = o.peer; delete o.peer; }
+}
+function joinField(nid, nearId, dir) {   // 新しい最上位の判断 nid を、nearId と同じ分野に並べる（上に足すときは、新しい方が代表になる）
+  const fp = fieldPrimary(nearId);
+  if (dir < 0 && fp === nearId) { adoptRootRole(nearId, nid); data.nodes[nearId].peer = nid; }
+  else data.nodes[nid].peer = fp;
+}
 const unsortedIds = () => inboxIds().filter(id => !ifldNode(data.nodes[id]));
 const fieldPendingIds = rootId => inboxIds().filter(id => { const f = ifldNode(data.nodes[id]); return f && fieldRootOf(f) === rootId; });
 const noTreePendingIds = () => inboxIds().filter(id => { const f = ifldNode(data.nodes[id]); return f && !fieldRootOf(f); });
 const isTop = id => data.roots.includes(id) || !!(data.nodes[id] && (data.nodes[id].home || data.nodes[id].inbox));
 const frameUsers = id => Object.values(data.nodes).filter(n => (n.frames || []).includes(id));
-const dropNodeLinks = ids => Object.values(data.nodes).forEach(x => {
-  x.kids = x.kids.filter(k => !ids.has(k.id)); x.frames = (x.frames || []).filter(f => !ids.has(f));
-  if (x.jump && ids.has(x.jump)) delete x.jump;
-  if (x.maps) { Object.keys(x.maps).forEach(k => { const [o, f] = k.split('>'); if (ids.has(o) || ids.has(f) || ids.has(x.maps[k])) delete x.maps[k]; }); if (!Object.keys(x.maps).length) delete x.maps; }
-});
+function dropNodeLinks(ids) {
+  ids.forEach(pid => {   // 同じ分野に並べた最上位の判断の「代表」が消えるときは、次の1つに代表を引き継ぐ
+    const peers = Object.values(data.nodes).filter(x => x.peer === pid && !ids.has(x.id));
+    if (!peers.length) return;
+    const np = peers[0]; adoptRootRole(pid, np.id); delete np.peer;
+    if (view.type === 'field' && view.rootId === pid) view = { type: 'field', rootId: np.id };
+  });
+  Object.values(data.nodes).forEach(x => {
+    x.kids = x.kids.filter(k => !ids.has(k.id)); x.frames = (x.frames || []).filter(f => !ids.has(f));
+    if (x.jump && ids.has(x.jump)) delete x.jump;
+    if (x.peer && ids.has(x.peer)) delete x.peer;
+    if (x.maps) { Object.keys(x.maps).forEach(k => { const [o, f] = k.split('>'); if (ids.has(o) || ids.has(f) || ids.has(x.maps[k])) delete x.maps[k]; }); if (!Object.keys(x.maps).length) delete x.maps; }
+  });
+}
 
 /* ---------- サンプル ---------- */
 function flat(N) {   // 解釈・考慮要素は趣旨欄にまとめ、メモ（所見）は載せない
@@ -1037,7 +1061,7 @@ function download(name, text, type) {
 }
 function exportCSV(scope) {
   stamp();
-  const roots = scope === 'all' ? data.roots.filter(r => data.nodes[r]) : (view.type === 'field' && data.nodes[view.rootId] ? [view.rootId] : []);
+  const roots = scope === 'all' ? data.roots.filter(r => data.nodes[r]) : (view.type === 'field' && data.nodes[view.rootId] ? fieldRoots(view.rootId) : []);
   if (!roots.length) { showBanner('書き出すツリーがありません。「すべて」を選ぶか、分野のツリーを開いてから押してください。', 'err'); return; }
   const rows = buildRows(roots);
   const d = new Date(), p2 = n => String(n).padStart(2, '0');
@@ -1229,7 +1253,7 @@ function replaceVersion(newId, oldId) {   // 更新版を、前の版と同じ�
     if (x.jump === oldId) x.jump = newId;
   });
   const ri = data.roots.indexOf(oldId);
-  if (ri >= 0) { data.roots[ri] = newId; data.rootsAt = Date.now(); }
+  if (ri >= 0) { data.roots[ri] = newId; data.rootsAt = Date.now(); adoptRootRole(oldId, newId); }
   const drop = new Set(oldSub.filter(i => data.nodes[i] && (i === oldId || data.nodes[i].ssrc === old.ssrc)));
   drop.add(oldId);
   dropNodeLinks(drop);
@@ -1387,7 +1411,9 @@ ${CSV_SPEC}
 
 ■ 主な操作
 ・ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（ダブルクリック、F2）＝編集。Esc＝編集を終える。
-・Enter＝下にブロックを作る／Shift+Enter＝上／Tab＝下の階層／Shift+Tab＝上の階層。
+・ブロックを選んでいる（編集中でない）とき：Enter＝同じ階層の下にブロックを作る／Shift+Enter＝同じ階層の上／Tab＝一階層下／Shift+Tab＝一階層上。
+・名前を編集している間：Enter＝名前を確定（ブロックは増えない）。
+・最上位の判断を選んで Enter＝同じ分野の、もう1つの最上位の判断が並ぶ（「＋最上位の判断を追加」でも可）。
 ・ドラッグ＝位置を変える（相手の上端＝前、下端＝後ろ、中央＝中に入れる）。そのままだと下のブロックごと、Shiftを押しながらだと、そのブロックだけが動き、下のブロックはひとつ上の階層に上がる。
 ・Ctrl+C／X／V＝コピー・切り取り・貼り付け。Ctrl+Z／Y＝元に戻す・やり直す。Ctrl+F＝検索。
 ・キーは「⌨ キー設定」で変えられます。
@@ -1397,8 +1423,9 @@ ${CSV_SPEC}
 const ACTIONS = [
   { id: 'edit', label: '編集モードにする（名前の編集と詳細欄が開く）', def: 'F2', scope: 'select' },
   { id: 'exit', label: '編集モードを終える', def: 'Escape', scope: 'edit' },
-  { id: 'below', label: '下にブロックを作る', def: 'Enter', scope: 'both' },
-  { id: 'above', label: '上にブロックを作る', def: 'Shift+Enter', scope: 'both' },
+  { id: 'confirm', label: '編集中の名前を確定する（編集モードを終える）', def: 'Enter', scope: 'title' },
+  { id: 'below', label: '同じ階層の下にブロックを作る（ブロックを選んでいるとき）', def: 'Enter', scope: 'select' },
+  { id: 'above', label: '同じ階層の上にブロックを作る（ブロックを選んでいるとき）', def: 'Shift+Enter', scope: 'select' },
   { id: 'child', label: '右（一階層下）にブロックを作る', def: 'Tab', scope: 'both' },
   { id: 'outdent', label: '左（一階層上）にブロックを作る（根では親で包む）', def: 'Shift+Tab', scope: 'both' },
   { id: 'up', label: '選択を上へ移動', def: 'ArrowUp', scope: 'both' },
@@ -1415,7 +1442,7 @@ const ACTIONS = [
   { id: 'panel', label: '右の「組み方」欄を開閉', def: 'Ctrl+.', scope: 'all' },
   { id: 'home', label: '分野ツリー（ホーム）へ', def: 'Alt+Home', scope: 'all' },
 ];
-const SCOPES = { all: ['edit', 'select', 'field'], both: ['edit', 'select'], select: ['select'], edit: ['edit', 'field'] };
+const SCOPES = { all: ['edit', 'select', 'field'], both: ['edit', 'select'], select: ['select'], edit: ['edit', 'field'], title: ['edit'] };
 let keymap = {}, capturing = null;
 function loadKeys() {
   keymap = {}; ACTIONS.forEach(a => { keymap[a.id] = a.def; });
@@ -1464,6 +1491,7 @@ function addSibling(path, dir) {
     if (data.nodes[id].home) { data.nodes[nid].home = true; afterCreate(nid); return; }
     const i = data.roots.indexOf(id);
     if (i < 0) data.roots.push(nid); else data.roots.splice(dir < 0 ? i : i + 1, 0, nid);
+    joinField(nid, id, dir);   // 同じ分野の、もう1つの最上位の判断として並べる（別の「未登録のツリー」にしない）
     afterCreate(nid); return;
   }
   const p = data.nodes[path[path.length - 2]];
@@ -1478,7 +1506,7 @@ function addUp(path) {   // 親で包む：このブロックを子にする新�
     const i = data.roots.indexOf(id), o = data.nodes[id];
     if (o.home) { N.home = true; delete o.home; }
     else if (o.inbox) { N.inbox = true; if (o.ifld) N.ifld = o.ifld; clearInboxMark(o); }
-    else if (i >= 0) data.roots[i] = nid; else data.roots.push(nid);
+    else if (i >= 0) { data.roots[i] = nid; adoptRootRole(id, nid); } else data.roots.push(nid);
   } else {
     data.nodes[path[path.length - 2]].kids.find(k => k.id === id).id = nid;
   }
@@ -1497,6 +1525,7 @@ function outdent(path) { // 一階層上に作る：親の隣（親の次）に�
     if (data.nodes[parentId].home) { data.nodes[nid].home = true; afterCreate(nid); return; }
     const i = data.roots.indexOf(parentId);
     if (i < 0) data.roots.push(nid); else data.roots.splice(i + 1, 0, nid);
+    joinField(nid, parentId, 1);
     afterCreate(nid); return;
   }
   const gp = data.nodes[path[path.length - 3]];
@@ -1535,6 +1564,7 @@ function runAction(id) {
   const path = selKey ? selKey.split('>') : null;
   switch (id) {
     case 'search': { const q = $('#q'); q.focus(); q.select(); return true; }
+    case 'confirm':
     case 'exit':
       if (!editing) return false;
       editing = false; if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -1605,7 +1635,7 @@ function pasteSel() {
     const map = {}; Object.keys(clip.nodes).forEach(i => { map[i] = uid(); });
     Object.keys(clip.nodes).forEach(i => {
       const o = JSON.parse(JSON.stringify(clip.nodes[i])), nid = map[i];
-      o.id = nid; delete o.mt; delete o.home; delete o.sid; delete o.ssrc; delete o.psid; delete o.prev; delete o.ptarget; delete o.inbox;
+      o.id = nid; delete o.mt; delete o.home; delete o.sid; delete o.ssrc; delete o.psid; delete o.prev; delete o.ptarget; delete o.inbox; delete o.peer;
       o.kids = o.kids.filter(k => map[k.id]).map(k => Object.assign({}, k, { id: map[k.id] }));
       o.frames = (o.frames || []).map(f => map[f] || f).filter(f => data.nodes[f] || Object.values(map).includes(f));
       if (o.maps) { const m2 = {}; Object.keys(o.maps).forEach(k => { const [a, b] = k.split('>'); m2[(map[a] || a) + '>' + (map[b] || b)] = map[o.maps[k]] || o.maps[k]; }); o.maps = m2; }
@@ -1829,7 +1859,7 @@ function nodeLi(id, link, path, bi) {
     if (bi.w) row.appendChild(el('span', 'badge tier', 'ウェイト ' + bi.w));
   }
   if (isEdit) {
-    const inp = el('input', 'tin'); inp.type = 'text'; inp.value = n.title; inp.placeholder = '名前を入力（' + kl('below') + '＝下に新規／' + kl('child') + '＝中に新規）';
+    const inp = el('input', 'tin'); inp.type = 'text'; inp.value = n.title; inp.placeholder = '名前を入力（' + kl('confirm') + '＝確定／' + kl('child') + '＝中に新規）';
     inp.addEventListener('input', () => { n.title = inp.value; changed(); const h = $('#panel h2'); if (h) h.textContent = '選択中：' + (n.title || '（無題）'); });
     inp.addEventListener('keydown', e => {
       if (e.isComposing || e.keyCode === 229) return;
@@ -2069,7 +2099,7 @@ function focusIfWanted() {
   const t = document.querySelector('#tree .row.sel input.tin');
   if (t) { t.focus(); const l = t.value.length; t.setSelectionRange(l, l); }
 }
-const viewRoots = () => view.type === 'map' ? homeIds().concat(unsortedIds(), noTreePendingIds()) : (data.nodes[view.rootId] ? [view.rootId].concat(fieldPendingIds(view.rootId)) : []);
+const viewRoots = () => view.type === 'map' ? homeIds().concat(unsortedIds(), noTreePendingIds()) : (data.nodes[view.rootId] ? fieldRoots(view.rootId).concat(fieldPendingIds(fieldPrimary(view.rootId))) : []);
 function expandAllFrom(roots) {
   const walk = (id, path) => { if (path.includes(id) || !data.nodes[id]) return; const n = data.nodes[id]; if (n.kids.length) expanded.add(path.concat(id).join('>')); n.kids.forEach(k => walk(k.id, path.concat(id))); };
   roots.forEach(r => walk(r, []));
@@ -2087,7 +2117,7 @@ function openField(rootId) {
   $('#q').value = ''; searchIdx = -1; render();
   const t = $('#tree'); if (t) t.scrollTop = 0;
 }
-function mapNodeFor(rootId) { return Object.values(data.nodes).find(n => n.jump === rootId); }
+function mapNodeFor(rootId) { const p = fieldPrimary(rootId); return Object.values(data.nodes).find(n => n.jump === p); }
 function registerField(rootId) {   // 分野ツリーに、このツリーへのジャンプを追加
   let hid = homeIds()[0];
   if (!hid) { hid = uid(); const h = newNode(hid, '分野ツリー（ホーム）'); h.home = true; data.nodes[hid] = h; }
@@ -2105,7 +2135,7 @@ function renderCrumb() {
     c.appendChild(el('b', null, '（表示中）'));
   } else if (r) {
     c.appendChild(document.createTextNode('分野ツリーに未登録のツリー　'));
-    const b = el('button', 'sm', '分野ツリーに登録'); b.onclick = () => registerField(view.rootId); c.appendChild(b);
+    const b = el('button', 'sm', '分野ツリーに登録'); b.onclick = () => registerField(fieldPrimary(view.rootId)); c.appendChild(b);
   }
 }
 function renderTree() {
@@ -2120,10 +2150,10 @@ function renderTree() {
   (view.type === 'map' ? roots.filter(r => data.nodes[r].home) : roots.filter(r => !data.nodes[r].inbox)).forEach(id => ul.appendChild(nodeLi(id, null, [], null)));
   box.appendChild(ul);
   if (view.type === 'map') box.appendChild(inboxSection());
-  else if (data.nodes[view.rootId] && !data.nodes[view.rootId].inbox) box.appendChild(fieldInboxSection(fieldPendingIds(view.rootId)));
+  else if (data.nodes[view.rootId] && !data.nodes[view.rootId].inbox) box.appendChild(fieldInboxSection(fieldPendingIds(fieldPrimary(view.rootId))));
   if (view.type === 'map') {
     const jumped = new Set(Object.values(data.nodes).map(n => n.jump).filter(Boolean));
-    const nr = data.roots.filter(r => data.nodes[r] && !jumped.has(r));
+    const nr = data.roots.filter(r => data.nodes[r] && !jumped.has(r) && fieldPrimary(r) === r);
     if (nr.length) {
       box.appendChild(el('div', 'unh', '分野ツリーに未登録のツリー（クリックで開く。選んだ分野の枠で「分野ツリーに登録」できます）'));
       nr.forEach(id => { const b = el('button', 'chipb sm', data.nodes[id].title || '（無題）'); b.onclick = () => openField(id); box.appendChild(b); });
@@ -2142,7 +2172,7 @@ function renderTree() {
   box.querySelectorAll('.detail textarea').forEach(autosize);
   renderCrumb();
   { const n = inboxIds().length; $('#btnHome').textContent = '🏠 分野ツリー' + (n ? '（📥' + n + '）' : ''); }
-  $('#btnRoot').textContent = view.type === 'map' ? '＋分野を追加' : '＋新しいツリー';
+  $('#btnRoot').textContent = view.type === 'map' ? '＋分野を追加' : '＋最上位の判断を追加';
 }
 function addInboxTop(ifld) {   // 未分類／未接続のエリアに、新しい空のツリーを足して、そのまま書き込む
   const nid = uid(), n = newNode(nid, ''); n.inbox = true; if (ifld) n.ifld = ifld; data.nodes[nid] = n;
@@ -2201,7 +2231,7 @@ function reveal(id) {
     const tn = data.nodes[top];
     if (tn && tn.home) view = { type: 'map' };
     else if (tn && tn.inbox) { const f = ifldNode(tn), r = f && fieldRootOf(f); view = r ? { type: 'field', rootId: r } : { type: 'map' }; }
-    else if (!(view.type === 'field' && view.rootId === top)) view = { type: 'field', rootId: top };
+    else if (!(view.type === 'field' && fieldPrimary(view.rootId) === fieldPrimary(top))) view = { type: 'field', rootId: fieldPrimary(top) };
     for (let i = 1; i < p.length; i++) expanded.add(p.slice(0, i).join('>')); selKey = p.join('>');
   } else selKey = id;
   editing = false;
@@ -2523,7 +2553,7 @@ $('#btnRoot').onclick = () => {
     const p = selKey ? data.nodes[selId()] : null;
     if (p) { p.kids.push({ id, role: '?', w: '', tier: '' }); expanded.add(selKey); afterCreate(selKey + '>' + id); }
     else { data.nodes[id].home = true; afterCreate(id); }
-  } else { data.roots.push(id); afterCreate(id); }
+  } else { data.roots.push(id); data.nodes[id].peer = fieldPrimary(view.rootId); afterCreate(id); }   // いま見ている分野の、もう1つの最上位の判断
 };
 
 // キーの変更（割り当て待ち）
