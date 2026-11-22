@@ -100,6 +100,9 @@ li.ghead.wg span{background:var(--wgbg);color:var(--wg)}
 .row.dz-before{box-shadow:inset 0 3px 0 var(--acc)}
 .row.dz-after{box-shadow:inset 0 -3px 0 var(--acc)}
 .row.dragging{opacity:.45}
+.chipb.dragging{opacity:.45}
+.chipb[draggable=true]{cursor:grab}
+.inboxsec.dz-area{outline:2px dashed var(--acc);outline-offset:-2px}
 #dndHint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:50;display:none;pointer-events:none;max-width:90vw}
 .ttl{font-weight:600}
 .ttl.blank{color:var(--sub);font-weight:400}
@@ -216,7 +219,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611221042</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611221330</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
@@ -236,7 +239,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <p><b>分野ツリー（ホーム画面）</b>：左上の「🏠 分野ツリー」が、分野の一覧（地図）です。分野名をクリックすると、その分野のツリーだけが表示されます。分野の追加・並べ替えは、分野ツリーの中で、ふつうのブロックと同じように行えます。分野名のブロックに「開くツリー」を設定すると、ジャンプ先になります（右の「◀ 組み方」欄）。</p>
   <p><b>ドラッグで位置を変える</b>：ブロックをつかんで、別のブロックの上端（前に置く）・下端（後ろに置く）・中央（中に入れる）に落とします。そのままだと下のブロックごと動き、<kbd>Shift</kbd>を押しながら落とすと、そのブロックだけが動いて、下のブロックはひとつ上の階層に上がります。分野の最上位のブロックは動かせません。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で戻せます。</p>
   <p><b>コピー・切り取り・貼り付け／取り消し</b>：ブロックを選んで <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>X</kbd>／<kbd>V</kbd>（貼り付けは、選んだブロックの下に入ります）。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で元に戻し、<kbd>Ctrl</kbd>+<kbd>Y</kbd>でやり直し。キーは「⌨ キー設定」で変えられます。</p>
-  <p><b>ブロックを作る</b>：ブロックを選んでいる（編集中でない）とき、<kbd>Enter</kbd>＝同じ階層の下に追加、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝同じ階層の上に追加、<kbd>Tab</kbd>＝一階層下に追加、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝一階層上に追加。名前を編集している間は、<kbd>Enter</kbd>＝名前を確定（ブロックは増えません）。最上位の判断を選んで <kbd>Enter</kbd> を押すと、同じ分野の、もう1つの最上位の判断が並びます（「＋最上位の判断を追加」でも追加できます）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
+  <p><b>ブロックを作る</b>：ブロックを選んでいる（編集中でない）とき、<kbd>Enter</kbd>＝同じ階層の下に追加、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝同じ階層の上に追加、<kbd>Tab</kbd>＝一階層下に追加、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝一階層上に追加。名前を編集している間は、<kbd>Enter</kbd>＝名前を確定（ブロックは増えません）。ツリーのブロックをつかんで、下の「未接続ツリー」「未分類ツリー」の枠に落とすと、木から切り離して移せます。親を消したときに残った下のブロックは、その分野の「未接続ツリー」に入ります。最上位の判断を選んで <kbd>Enter</kbd> を押すと、同じ分野の、もう1つの最上位の判断が並びます（「＋最上位の判断を追加」でも追加できます）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
   <p><b>要件の組み方</b>：「すべて必要」は青の太い線で束ねて①②③。「どれか1つ」は橙色でA・B・C。「総合考慮」は紫色で、ウェイトと優先度（一次的・副次的・補充的）を書けます。</p>
   <p><b>枠組みの重ね表示</b>：枠組みを重ねたブロックは、ツリー全体の背景に枠組みの色が付き、下に「枠組み：〇〇」の帯が出ます。帯をクリックするとチェック表が開き、各要件がどの要素に対応しているか（未対応はどれか）が分かります。対応は、編集モードの詳細欄「枠組みとの対応」で選びます。</p>
   <p><b>保存先・バックアップ</b>：<button id="btnSaveAs" class="sm" title="空の新しいファイルを保存先にします。すでに中身のあるファイルは選べません">💾 新しい保存先ファイルを作る（初めてだけ）</button> <button id="btnReconnect" class="sm" title="保存先ファイルを移動・名前変更したときに、つなぎ直す">🔌 保存先を選び直す</button> <button id="btnExport" class="sm" title="データをファイルとしてダウンロード">⬇ 書き出し（バックアップ）</button> <button id="btnImport" class="sm" title="書き出したファイルを読み込む">⬆ 読み込み</button> <button id="btnSamples" class="sm" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button></p>
@@ -1218,7 +1221,7 @@ function fieldList() {   // いま、開くツリーがある分野：[{id, labe
 function clearInboxMark(n) { delete n.inbox; delete n.ifld; delete n.tag; delete n.fld; delete n.prev; delete n.ptarget; }
 function assignField(id, mid) {   // ② 分野に入れる：その分野の暫定の置き場に移る（分野ツリーの中には、まだつなげない）
   const n = data.nodes[id], f = data.nodes[mid]; if (!n || !f) return;
-  n.ifld = mid; changed(); render();
+  n.inbox = true; n.ifld = mid; changed(); render();
   const r = fieldRootOf(f), label = fieldStrOf(mid);
   showBanner('「' + label + '」の暫定の置き場に入れました。' + (r ? '次は、その分野のツリーを開いて、置き場所を決めます。' : 'この分野のツリーはまだ無いので、ホームの「分野だけ決めたもの」から、最上位のツリーにできます。'), 'info', r ? [['その分野を開く', () => openField(r)]] : []);
 }
@@ -1230,6 +1233,47 @@ function placeAsTop(id, mid) {   // ③ その分野の最上位のツリーに�
   f.jump = id; data.mapInit = true;
   changed(); openField(id);
   showBanner('「' + fieldStrOf(mid) + '」の最上位のツリーにしました。');
+}
+function mergeIntoField(id, primary) {   // 未登録のツリー id を、primary の分野の「もう1つの最上位の判断」として並べる
+  const n = data.nodes[id]; if (!n || id === primary || !data.nodes[primary]) return;
+  peersOf(id).forEach(p => { data.nodes[p].peer = primary; });
+  n.peer = primary; changed(); openField(primary);
+  showBanner('「' + (n.title || '無題') + '」を、この分野のもう1つの最上位の判断として並べました。');
+}
+function detachToInbox(path, ifld) {   // 木の中のブロックを、下のブロックごと切り離して、未分類／未接続の置き場に移す
+  const id = path[path.length - 1], n = data.nodes[id], p = data.nodes[path[path.length - 2]];
+  if (!n || !p || path.length < 2) return;
+  const top = data.nodes[path[0]];
+  if (top && top.home) { showBanner('分野ツリーの分野名は、置き場には移せません。', 'err'); return; }
+  if (parentsOf(id).length > 1) { showBanner('他の場所にもつながっているブロックは、置き場には移せません。', 'err'); return; }
+  commitHistory();
+  p.kids = p.kids.filter(k => k.id !== id);
+  n.inbox = true; if (ifld) n.ifld = ifld; else delete n.ifld;
+  selKey = null; editing = false; changed(); commitHistory(); render();
+  showBanner('「' + (n.title || '無題') + '」を、' + (ifld ? 'この分野の「未接続ツリー」' : '「未分類ツリー」') + 'に移しました（つながりを外しました）。');
+}
+function wireAreaDrop(wrap, ifld) {   // 置き場（未分類／未接続）の枠に、木の中のブロックを落とすと、切り離して置き場に移る
+  wrap.addEventListener('dragover', e => {
+    if (!dragSrc || dragSrc.inbox || !dragSrc.path || dragSrc.path.length < 2) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; wrap.classList.add('dz-area');
+    dndHint('ここに落とすと、木から切り離して、' + (ifld ? 'この分野の「未接続ツリー」' : '「未分類ツリー」') + 'に移します');
+  });
+  wrap.addEventListener('dragleave', e => { if (!wrap.contains(e.relatedTarget)) wrap.classList.remove('dz-area'); });
+  wrap.addEventListener('drop', e => {
+    wrap.classList.remove('dz-area');
+    if (!dragSrc || dragSrc.inbox || !dragSrc.path || dragSrc.path.length < 2) return;
+    e.preventDefault(); const src = dragSrc.path; dragSrc = null; dndHint('');
+    detachToInbox(src, ifld);
+  });
+}
+function chipDrag(b, id) {   // 「未登録のツリー」「未接続のブロック」のボタンを、つかんで分野名に落とせるようにする
+  b.draggable = true;
+  b.addEventListener('dragstart', e => {
+    dragSrc = { inbox: true, id, key: id, path: [id] };
+    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', id);
+    b.classList.add('dragging');
+  });
+  b.addEventListener('dragend', () => { dragSrc = null; b.classList.remove('dragging'); clearDz(); dndHint(''); });
 }
 function placeUnder(id, targetId, role) {
   const n = data.nodes[id], t = data.nodes[targetId]; if (!n || !t) return;
@@ -1544,13 +1588,24 @@ function removeEmpty(path) {
   data.roots = data.roots.filter(r => r !== id); delete data.nodes[id];
   selKey = prev; editing = !!prev; wantFocus = true; changed(); render();
 }
+function fieldMapIdOfPath(path) {   // このブロックがある木が、どの分野に入っているか（分野ツリー内の分野ブロックのid）。分からなければ null
+  const top = data.nodes[path[0]]; if (!top) return null;
+  if (top.inbox) return ifldNode(top) ? top.ifld : null;
+  if (top.home) return null;
+  const m = mapNodeFor(path[0]); return m ? m.id : null;
+}
 function deleteSelected() {
   if (!selKey) return;
-  const id = selId(), n = data.nodes[id]; if (!n) return;
-  const uses = parentsOf(id).length;
-  if (!confirm('「' + (n.title || '無題') + '」を削除します' + (uses > 1 ? '（' + uses + 'か所から外れます）' : '') + '。下にあるブロックは「未接続」として残ります。よろしいですか？')) return;
+  const path = selKey.split('>'), id = selId(), n = data.nodes[id]; if (!n) return;
+  const uses = parentsOf(id).length, top = data.nodes[path[0]];
+  const kidIds = n.kids.map(k => k.id), ifld = fieldMapIdOfPath(path), rescue = !!top && !top.home;
+  if (!confirm('「' + (n.title || '無題') + '」を削除します' + (uses > 1 ? '（' + uses + 'か所から外れます）' : '') + '。下にあるブロックは、' + (rescue ? 'その分野の「未接続ツリー」（分野が無いときは「未分類ツリー」）' : '「未接続のブロック」') + 'に残ります。よろしいですか？')) return;
   dropNodeLinks(new Set([id]));
   data.roots = data.roots.filter(r => r !== id); delete data.nodes[id];
+  if (rescue) kidIds.forEach(k => {   // 親を失ったブロックは、その分野の「未接続ツリー」に入れる（どの木からも外れて見えなくならないように）
+    const c = data.nodes[k];
+    if (c && !c.home && !c.inbox && !data.roots.includes(k) && parentsOf(k).length === 0 && frameUsers(k).length === 0) { c.inbox = true; if (ifld) c.ifld = ifld; }
+  });
   selKey = null; editing = false; changed(); render();
 }
 function moveSel(dir) {
@@ -1766,7 +1821,8 @@ function inboxDropOk(id, tpath, row, e) {   // 置き場のブロックを、こ
   if (top.home) {   // 分野ツリー（地図）：分野名に落とす
     if (tpath.length < 2 || t.home) return { ok: false };
     if (!(fieldRootOf(t) || !t.kids.length)) return { ok: false, msg: 'ここは、分野の見出しです。分野名（ツリーを開く行）に落としてください' };
-    return { ok: true, zone: 'into', hint: fieldRootOf(t) ? '「' + fieldStrOf(tid) + '」の未接続ツリーに入ります' : '「' + fieldStrOf(tid) + '」の最上位のツリーになります' };
+    const asRoot = data.roots.includes(id) && !data.nodes[id].inbox;   // 「未登録のツリー」から持ってきたもの
+    return { ok: true, zone: 'into', hint: fieldRootOf(t) ? (asRoot ? '「' + fieldStrOf(tid) + '」の、もう1つの最上位の判断として並べます' : '「' + fieldStrOf(tid) + '」の未接続ツリーに入ります') : '「' + fieldStrOf(tid) + '」の最上位のツリーになります' };
   }
   const zone = dropZone(e, row, tpath), np = zone === 'into' ? tid : tpath[tpath.length - 2];
   if (!np || !data.nodes[np] || data.nodes[np].home || data.nodes[np].inbox || id === np || reaches(id, np)) return { ok: false };
@@ -1776,7 +1832,11 @@ function doInboxDrop(id, tpath, zone) {
   const top = data.nodes[tpath[0]], tid = tpath[tpath.length - 1], t = data.nodes[tid], n = data.nodes[id];
   if (!n || !t) return;
   commitHistory();
-  if (top.home) { if (fieldRootOf(t)) assignField(id, tid); else placeAsTop(id, tid); commitHistory(); return; }
+  if (top.home) {
+    const asRoot = data.roots.includes(id) && !n.inbox;
+    if (fieldRootOf(t)) { if (asRoot) mergeIntoField(id, fieldRootOf(t)); else assignField(id, tid); } else placeAsTop(id, tid);
+    commitHistory(); return;
+  }
   const np = zone === 'into' ? tid : tpath[tpath.length - 2], P = data.nodes[np];
   clearInboxMark(n);
   const nl = { id, role: 'req', w: '', tier: '' };
@@ -2156,14 +2216,16 @@ function renderTree() {
     const nr = data.roots.filter(r => data.nodes[r] && !jumped.has(r) && fieldPrimary(r) === r);
     if (nr.length) {
       box.appendChild(el('div', 'unh', '分野ツリーに未登録のツリー（クリックで開く。選んだ分野の枠で「分野ツリーに登録」できます）'));
-      nr.forEach(id => { const b = el('button', 'chipb sm', data.nodes[id].title || '（無題）'); b.onclick = () => openField(id); box.appendChild(b); });
+      nr.forEach(id => { const b = el('button', 'chipb sm', data.nodes[id].title || '（無題）'); b.onclick = () => openField(id); b.title = 'クリックで開く／つかんで、上の分野名に落とすと、その分野に入ります'; chipDrag(b, id); box.appendChild(b); });
     }
     const un = Object.keys(data.nodes).filter(id => !data.roots.includes(id) && !data.nodes[id].home && !data.nodes[id].inbox && parentsOf(id).length === 0 && frameUsers(id).length === 0);
     if (un.length) {
-      box.appendChild(el('div', 'unh', '未接続のブロック（どこにもつながっていません）'));
+      box.appendChild(el('div', 'unh', '未接続のブロック（どこにもつながっていません。つかんで、上の分野名に落とせます）'));
       un.forEach(id => {
         const b = el('button', 'chipb sm', data.nodes[id].title || '（無題）');
         b.onclick = () => { selKey = id; editing = false; render(); };
+        b.title = 'つかんで、上の分野名に落とすと、その分野の「未接続ツリー」に入ります';
+        chipDrag(b, id);
         box.appendChild(b);
       });
     }
@@ -2181,6 +2243,7 @@ function addInboxTop(ifld) {   // 未分類／未接続のエリアに、新し�
 }
 function inboxSection() {
   const ids = unsortedIds(), wrap = el('div', 'inboxsec');
+  wireAreaDrop(wrap, null);
   const h = el('div', 'inboxh');
   h.appendChild(el('b', null, '📥 未分類ツリー（' + ids.length + '件）'));
   const bs = el('span', 'inboxb');
@@ -2205,6 +2268,7 @@ function fieldInboxSection(ids) {
   const wrap = el('div', 'inboxsec'), h = el('div', 'inboxh');
   h.appendChild(el('b', null, '📥 未接続ツリー（' + ids.length + '件）'));
   const m = mapNodeFor(view.rootId);
+  if (m) wireAreaDrop(wrap, m.id);
   if (m) { const bs = el('span', 'inboxb'), b = el('button', 'sm', '＋ツリーを書き込む'); b.title = 'ここに、判断・要件のツリーを直接書きます'; b.onclick = () => addInboxTop(m.id); bs.appendChild(b); h.appendChild(bs); }
   wrap.appendChild(h);
   wrap.appendChild(el('div', 'hint', ids.length
