@@ -219,7 +219,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611221330</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611231105</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
@@ -234,12 +234,13 @@ dialog h3{margin:0 0 6px;font-size:16px}
 <details>
   <summary>使い方・データの扱い</summary>
   <p><b>データの扱い</b>：このページ（アプリ本体・GitHub）には、書いた内容は一切入りません。内容は、別のデータファイル（あなたのGoogleドライブなど）にだけ保存されます。内容は「①このブラウザの中（自動保存）」と「②あなたが選んだデータファイル」にだけ保存され、ネットには送られません。「💾 保存先ファイルを作る」でGoogleドライブなどにファイルを作ると、以後は編集のたびに自動でそのファイルと同期します（PCのChrome・Edge）。<b>同期のルール</b>：ブロックごとに、編集時刻が新しい方を採用します（Ankiと同じ考え方）。別の端末で更新したときは、画面に戻った時や「🔄 同期」で取り込みます。新しい端末では、最初に「📂 ファイルを開く」でデータファイルを選んでください（サンプルが混ざるのを防ぐため）。</p>
+  <p><b>ブロックの呼び名</b>：<b>効果</b>＝下の要件がそろうと成立する結論（親のブロック。いちばん上は、その分野の最終的な効果）。<b>要件</b>＝効果の下に並ぶ条件（子のブロック）。同じブロックが、上から見れば要件、下から見れば効果になります。法律の木では「効果」と呼び、法律以外の木（サンプルの【経済】【暮らし】など）では「結論」と読み替えてください。「判断」は、木をたどって認定・あてはめ・総合考慮をする作業を指します。</p>
   <p><b>操作</b>：ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（またはダブルクリック、<kbd>F2</kbd>）＝編集モード（名前の編集と、趣旨・具体例の入力欄が開く）。「趣旨」「具体例」の小さなボタンで、内容の表示・非表示を切り替えます。<kbd>Esc</kbd>で編集モードを終える。下位要件を閉じるには、線の途中の「−」。ブロックの右の「↳3」は、下に3つ要素があるという印です。</p>
   <p><b>資料の取り込み（CSV）</b>：「⇅ CSV・AI」から、AIに渡す指示文をコピーし、Vflatの文字起こしやNotebookLMのまとめと一緒にAIに渡すと、取り込み用のCSVを作ってもらえます。取り込んだものは「📥 未分類ツリー（）」に入ります。まず「分野に入れる」で分野を選び、次にその分野のツリーを開いて「置き場所を決める」で、どのブロックの下に置くかを決めます。書き方の詳しい説明は、「decision_tree_usage.txt」にあります。</p>
   <p><b>分野ツリー（ホーム画面）</b>：左上の「🏠 分野ツリー」が、分野の一覧（地図）です。分野名をクリックすると、その分野のツリーだけが表示されます。分野の追加・並べ替えは、分野ツリーの中で、ふつうのブロックと同じように行えます。分野名のブロックに「開くツリー」を設定すると、ジャンプ先になります（右の「◀ 組み方」欄）。</p>
   <p><b>ドラッグで位置を変える</b>：ブロックをつかんで、別のブロックの上端（前に置く）・下端（後ろに置く）・中央（中に入れる）に落とします。そのままだと下のブロックごと動き、<kbd>Shift</kbd>を押しながら落とすと、そのブロックだけが動いて、下のブロックはひとつ上の階層に上がります。分野の最上位のブロックは動かせません。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で戻せます。</p>
   <p><b>コピー・切り取り・貼り付け／取り消し</b>：ブロックを選んで <kbd>Ctrl</kbd>+<kbd>C</kbd>／<kbd>X</kbd>／<kbd>V</kbd>（貼り付けは、選んだブロックの下に入ります）。<kbd>Ctrl</kbd>+<kbd>Z</kbd>で元に戻し、<kbd>Ctrl</kbd>+<kbd>Y</kbd>でやり直し。キーは「⌨ キー設定」で変えられます。</p>
-  <p><b>ブロックを作る</b>：ブロックを選んでいる（編集中でない）とき、<kbd>Enter</kbd>＝同じ階層の下に追加、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝同じ階層の上に追加、<kbd>Tab</kbd>＝一階層下に追加、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝一階層上に追加。名前を編集している間は、<kbd>Enter</kbd>＝名前を確定（ブロックは増えません）。ツリーのブロックをつかんで、下の「未接続ツリー」「未分類ツリー」の枠に落とすと、木から切り離して移せます。親を消したときに残った下のブロックは、その分野の「未接続ツリー」に入ります。最上位の判断を選んで <kbd>Enter</kbd> を押すと、同じ分野の、もう1つの最上位の判断が並びます（「＋最上位の判断を追加」でも追加できます）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
+  <p><b>ブロックを作る</b>：ブロックを選んでいる（編集中でない）とき、<kbd>Enter</kbd>＝同じ階層の下に追加、<kbd>Shift</kbd>+<kbd>Enter</kbd>＝同じ階層の上に追加、<kbd>Tab</kbd>＝一階層下に追加、<kbd>Shift</kbd>+<kbd>Tab</kbd>＝一階層上に追加。名前を編集している間は、<kbd>Enter</kbd>＝名前を確定（ブロックは増えません）。ツリーのブロックをつかんで、下の「未接続ツリー」「未分類ツリー」の枠に落とすと、木から切り離して移せます。親を消したときに残った下のブロックは、その分野の「未接続ツリー」に入ります。最上位の効果を選んで <kbd>Enter</kbd> を押すと、同じ分野の、もう1つの最上位の効果が並びます（「＋最上位の効果を追加」でも追加できます）。新しいブロックは「未設定」で、要件か「ただし」かは、編集モードの「位置づけ」であとから選びます。キーは「⌨ キー設定」で変えられます。<kbd>Ctrl</kbd>+<kbd>F</kbd>＝検索。</p>
   <p><b>要件の組み方</b>：「すべて必要」は青の太い線で束ねて①②③。「どれか1つ」は橙色でA・B・C。「総合考慮」は紫色で、ウェイトと優先度（一次的・副次的・補充的）を書けます。</p>
   <p><b>枠組みの重ね表示</b>：枠組みを重ねたブロックは、ツリー全体の背景に枠組みの色が付き、下に「枠組み：〇〇」の帯が出ます。帯をクリックするとチェック表が開き、各要件がどの要素に対応しているか（未対応はどれか）が分かります。対応は、編集モードの詳細欄「枠組みとの対応」で選びます。</p>
   <p><b>保存先・バックアップ</b>：<button id="btnSaveAs" class="sm" title="空の新しいファイルを保存先にします。すでに中身のあるファイルは選べません">💾 新しい保存先ファイルを作る（初めてだけ）</button> <button id="btnReconnect" class="sm" title="保存先ファイルを移動・名前変更したときに、つなぎ直す">🔌 保存先を選び直す</button> <button id="btnExport" class="sm" title="データをファイルとしてダウンロード">⬇ 書き出し（バックアップ）</button> <button id="btnImport" class="sm" title="書き出したファイルを読み込む">⬆ 読み込み</button> <button id="btnSamples" class="sm" title="サンプル（法律・他分野・分野ツリー）を追加／最新版に入れ替え">サンプルを追加・更新</button></p>
@@ -356,7 +357,7 @@ function normalize(d) {
   }
   for (const [id, n] of Object.entries(d.nodes)) {   // 分野ツリーからのジャンプ先
     if (out.nodes[id] && typeof n.jump === 'string' && out.nodes[n.jump]) out.nodes[id].jump = n.jump;
-    if (out.nodes[id] && typeof n.peer === 'string' && n.peer !== id && out.nodes[n.peer]) out.nodes[id].peer = n.peer;   // 同じ分野に並べた、もう1つの最上位の判断（peer＝代表の最上位）
+    if (out.nodes[id] && typeof n.peer === 'string' && n.peer !== id && out.nodes[n.peer]) out.nodes[id].peer = n.peer;   // 同じ分野に並べた、もう1つの最上位の効果（peer＝代表の最上位）
   }
   for (const [id, n] of Object.entries(d.nodes)) {   // 要件と枠組み要素の対応
     if (!out.nodes[id] || !n.maps || typeof n.maps !== 'object') continue;
@@ -458,7 +459,7 @@ function ifldNode(n) {   // このまとまりを入れてある分野（分野�
   const p = findPath(f.id); return p && p.length > 1 && data.nodes[p[0]] && data.nodes[p[0]].home ? f : null;
 }
 const fieldRootOf = f => (f && f.jump && data.nodes[f.jump] ? f.jump : null);
-/* 1つの分野に、最上位の判断を複数並べられる：先頭の1つ（代表）を分野ツリーの jump が指し、残りは peer で代表を指す */
+/* 1つの分野に、最上位の効果を複数並べられる：先頭の1つ（代表）を分野ツリーの jump が指し、残りは peer で代表を指す */
 const fieldPrimary = id => { const n = data.nodes[id]; return n && n.peer && data.nodes[n.peer] && !data.nodes[n.peer].peer ? n.peer : id; };
 const peersOf = pid => data.roots.filter(r => r !== pid && data.nodes[r] && data.nodes[r].peer === pid);
 const fieldRoots = id => { const p = fieldPrimary(id); return data.nodes[p] ? [p].concat(peersOf(p)) : []; };
@@ -467,7 +468,7 @@ function adoptRootRole(oldId, newId) {   // newId が、oldId に代わって、
   Object.values(data.nodes).forEach(x => { if (x.jump === oldId) x.jump = newId; if (x.peer === oldId && x.id !== newId) x.peer = newId; });
   if (o && o.peer && o.peer !== newId) { n.peer = o.peer; delete o.peer; }
 }
-function joinField(nid, nearId, dir) {   // 新しい最上位の判断 nid を、nearId と同じ分野に並べる（上に足すときは、新しい方が代表になる）
+function joinField(nid, nearId, dir) {   // 新しい最上位の効果 nid を、nearId と同じ分野に並べる（上に足すときは、新しい方が代表になる）
   const fp = fieldPrimary(nearId);
   if (dir < 0 && fp === nearId) { adoptRootRole(nearId, nid); data.nodes[nearId].peer = nid; }
   else data.nodes[nid].peer = fp;
@@ -478,7 +479,7 @@ const noTreePendingIds = () => inboxIds().filter(id => { const f = ifldNode(data
 const isTop = id => data.roots.includes(id) || !!(data.nodes[id] && (data.nodes[id].home || data.nodes[id].inbox));
 const frameUsers = id => Object.values(data.nodes).filter(n => (n.frames || []).includes(id));
 function dropNodeLinks(ids) {
-  ids.forEach(pid => {   // 同じ分野に並べた最上位の判断の「代表」が消えるときは、次の1つに代表を引き継ぐ
+  ids.forEach(pid => {   // 同じ分野に並べた最上位の効果の「代表」が消えるときは、次の1つに代表を引き継ぐ
     const peers = Object.values(data.nodes).filter(x => x.peer === pid && !ids.has(x.id));
     if (!peers.length) return;
     const np = peers[0]; adoptRootRole(pid, np.id); delete np.peer;
@@ -718,11 +719,11 @@ function otherSample() {
   mp('ex_pol_cost', 'ex_pol>ex_happy', 'ex_justify'); mp('ex_pol_proc', 'ex_pol>ex_happy', 'ex_justify');
   return { nodes: flat(N), roots: ['ex_rev', 'ex_conv', 'ex_buy', 'ex_shot', 'ex_pol', 'ex_happy'] };
 }
-function mapSample() {   // 分野ツリー（ホーム画面）：各分野の最上位の判断へジャンプする
+function mapSample() {   // 分野ツリー（ホーム画面）：各分野の最上位の効果へジャンプする
   const N = {};
   const add = (id, title, o = {}) => { N[id] = Object.assign(newNode(id, title), o); };
   const K = id => ({ id, role: '?' });
-  add('map_home', '分野ツリー（ホーム）', { home: true, purpose: '各分野の、最も究極的な目的となる判断へのジャンプ表。分野名をクリックすると、その分野のツリーだけが表示される。',
+  add('map_home', '分野ツリー（ホーム）', { home: true, purpose: '各分野の、最も究極的な効果（結論）へのジャンプ表。分野名をクリックすると、その分野のツリーだけが表示される。',
     kids: [K('map_law'), K('map_gen'), K('map_life'), K('map_econ'), K('map_acct'), K('map_math'), K('map_sport')] });
   add('map_law', '法律', { kids: [K('map_crim'), K('map_civil')] });
   add('map_crim', '刑法（刑を科す／科さない・その量）', { jump: 'kb_top' });
@@ -1234,11 +1235,11 @@ function placeAsTop(id, mid) {   // ③ その分野の最上位のツリーに�
   changed(); openField(id);
   showBanner('「' + fieldStrOf(mid) + '」の最上位のツリーにしました。');
 }
-function mergeIntoField(id, primary) {   // 未登録のツリー id を、primary の分野の「もう1つの最上位の判断」として並べる
+function mergeIntoField(id, primary) {   // 未登録のツリー id を、primary の分野の「もう1つの最上位の効果」として並べる
   const n = data.nodes[id]; if (!n || id === primary || !data.nodes[primary]) return;
   peersOf(id).forEach(p => { data.nodes[p].peer = primary; });
   n.peer = primary; changed(); openField(primary);
-  showBanner('「' + (n.title || '無題') + '」を、この分野のもう1つの最上位の判断として並べました。');
+  showBanner('「' + (n.title || '無題') + '」を、この分野のもう1つの最上位の効果として並べました。');
 }
 function detachToInbox(path, ifld) {   // 木の中のブロックを、下のブロックごと切り離して、未分類／未接続の置き場に移す
   const id = path[path.length - 1], n = data.nodes[id], p = data.nodes[path[path.length - 2]];
@@ -1450,14 +1451,19 @@ ${CSV_SPEC}
 ・このアプリの「📥 暫定の置き場」で「受け取りファイルを選ぶ」を押して、そのファイルを選ぶと、届いたものが置き場に入ります（画面に戻ったときに、新しい分のみ自動で取り込まれます。同じものを二重に取り込むことはありません）。
 
 ・向こうで直して送り直したブロックは、置き場に「更新版」として届きます。ブロックを選ぶと右の欄に「前の版と入れ替える」が出て、同じ場所に入れ替わります（前の版にこちらで書き足した内容は移りません）。
-・向こうの「判断」「要件」「括弧（グループ）」「趣旨」にも対応しています（括弧は「括弧」の印が付いたブロックになります）。向こうのカードに、データベースのブロックから戻るには、ブロックを選んで右の欄の「論証フローチャートで開く」を押します（最初の1回だけ、向こうのページのアドレスを聞かれます）。向こうから、このツリーの該当ブロックを開くリンク（decisions.html#node=…）も使えます。
-・分野に入れた・置いたブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（stage＝分野のみ／配置済み、分野名、ツリー上の道すじ。判断・要件・括弧・趣旨のそれぞれのid）を書いたファイル（decision_tree_placement.json）にできます。初回に保存先を選ぶと、以後は編集のあと自動で書き直します。向こうのページが読むためのものです（未分類のものは書きません）。
+・向こうの「効果」（旧名「判断」）「要件」「括弧（グループ）」「趣旨」にも対応しています（括弧は「括弧」の印が付いたブロックになります）。向こうのカードに、データベースのブロックから戻るには、ブロックを選んで右の欄の「論証フローチャートで開く」を押します（最初の1回だけ、向こうのページのアドレスを聞かれます）。向こうから、このツリーの該当ブロックを開くリンク（decisions.html#node=…）も使えます。
+・分野に入れた・置いたブロックは、「⇅ CSV・AI」→「配置ファイルを書き出す」で、置き場所（stage＝分野のみ／配置済み、分野名、ツリー上の道すじ。効果・要件・括弧・趣旨のそれぞれのid）を書いたファイル（decision_tree_placement.json）にできます。初回に保存先を選ぶと、以後は編集のあと自動で書き直します。向こうのページが読むためのものです（未分類のものは書きません）。
+
+■ ブロックの呼び名
+・効果＝下の要件がそろうと成立する結論（親のブロック。いちばん上は、その分野の最終的な効果）。要件＝効果の下に並ぶ条件（子のブロック）。同じブロックが、上から見れば要件、下から見れば効果になります。
+・法律の木では「効果」、法律以外の木（サンプルの【経済】【暮らし】など）では「結論」と読み替えてください。
+・「判断」は、木をたどって認定・あてはめ・総合考慮をする作業を指します（ツール名「判断ロジックツリー」は、そのまま）。
 
 ■ 主な操作
 ・ブロックを1回クリック＝選択して下位要件を一階層ひらく。もう1回クリック（ダブルクリック、F2）＝編集。Esc＝編集を終える。
 ・ブロックを選んでいる（編集中でない）とき：Enter＝同じ階層の下にブロックを作る／Shift+Enter＝同じ階層の上／Tab＝一階層下／Shift+Tab＝一階層上。
 ・名前を編集している間：Enter＝名前を確定（ブロックは増えない）。
-・最上位の判断を選んで Enter＝同じ分野の、もう1つの最上位の判断が並ぶ（「＋最上位の判断を追加」でも可）。
+・最上位の効果を選んで Enter＝同じ分野の、もう1つの最上位の効果が並ぶ（「＋最上位の効果を追加」でも可）。
 ・ドラッグ＝位置を変える（相手の上端＝前、下端＝後ろ、中央＝中に入れる）。そのままだと下のブロックごと、Shiftを押しながらだと、そのブロックだけが動き、下のブロックはひとつ上の階層に上がる。
 ・Ctrl+C／X／V＝コピー・切り取り・貼り付け。Ctrl+Z／Y＝元に戻す・やり直す。Ctrl+F＝検索。
 ・キーは「⌨ キー設定」で変えられます。
@@ -1535,7 +1541,7 @@ function addSibling(path, dir) {
     if (data.nodes[id].home) { data.nodes[nid].home = true; afterCreate(nid); return; }
     const i = data.roots.indexOf(id);
     if (i < 0) data.roots.push(nid); else data.roots.splice(dir < 0 ? i : i + 1, 0, nid);
-    joinField(nid, id, dir);   // 同じ分野の、もう1つの最上位の判断として並べる（別の「未登録のツリー」にしない）
+    joinField(nid, id, dir);   // 同じ分野の、もう1つの最上位の効果として並べる（別の「未登録のツリー」にしない）
     afterCreate(nid); return;
   }
   const p = data.nodes[path[path.length - 2]];
@@ -1822,7 +1828,7 @@ function inboxDropOk(id, tpath, row, e) {   // 置き場のブロックを、こ
     if (tpath.length < 2 || t.home) return { ok: false };
     if (!(fieldRootOf(t) || !t.kids.length)) return { ok: false, msg: 'ここは、分野の見出しです。分野名（ツリーを開く行）に落としてください' };
     const asRoot = data.roots.includes(id) && !data.nodes[id].inbox;   // 「未登録のツリー」から持ってきたもの
-    return { ok: true, zone: 'into', hint: fieldRootOf(t) ? (asRoot ? '「' + fieldStrOf(tid) + '」の、もう1つの最上位の判断として並べます' : '「' + fieldStrOf(tid) + '」の未接続ツリーに入ります') : '「' + fieldStrOf(tid) + '」の最上位のツリーになります' };
+    return { ok: true, zone: 'into', hint: fieldRootOf(t) ? (asRoot ? '「' + fieldStrOf(tid) + '」の、もう1つの最上位の効果として並べます' : '「' + fieldStrOf(tid) + '」の未接続ツリーに入ります') : '「' + fieldStrOf(tid) + '」の最上位のツリーになります' };
   }
   const zone = dropZone(e, row, tpath), np = zone === 'into' ? tid : tpath[tpath.length - 2];
   if (!np || !data.nodes[np] || data.nodes[np].home || data.nodes[np].inbox || id === np || reaches(id, np)) return { ok: false };
@@ -2073,7 +2079,7 @@ function makeFrameView(fid, i, ownerId) {
     it.appendChild(r1);
     const r2 = el('div', 'l2r'), ms = mappedBy(k.id);
     if (ms.length) {
-      r2.appendChild(el('span', 'sn', '← この判断の：'));
+      r2.appendChild(el('span', 'sn', '← この効果の：'));
       ms.forEach(x => { const b = el('button', 'sm', x.title || '（無題）'); b.onclick = e => { e.stopPropagation(); reveal(x.id); }; r2.appendChild(b); });
     } else r2.appendChild(el('span', 'badge miss', '未対応（考え忘れ？）'));
     it.appendChild(r2);
@@ -2234,7 +2240,7 @@ function renderTree() {
   box.querySelectorAll('.detail textarea').forEach(autosize);
   renderCrumb();
   { const n = inboxIds().length; $('#btnHome').textContent = '🏠 分野ツリー' + (n ? '（📥' + n + '）' : ''); }
-  $('#btnRoot').textContent = view.type === 'map' ? '＋分野を追加' : '＋最上位の判断を追加';
+  $('#btnRoot').textContent = view.type === 'map' ? '＋分野を追加' : '＋最上位の効果を追加';
 }
 function addInboxTop(ifld) {   // 未分類／未接続のエリアに、新しい空のツリーを足して、そのまま書き込む
   const nid = uid(), n = newNode(nid, ''); n.inbox = true; if (ifld) n.ifld = ifld; data.nodes[nid] = n;
@@ -2248,7 +2254,7 @@ function inboxSection() {
   h.appendChild(el('b', null, '📥 未分類ツリー（' + ids.length + '件）'));
   const bs = el('span', 'inboxb');
   const add = (tx, f, tip) => { const b = el('button', 'sm', tx); if (tip) b.title = tip; b.onclick = f; bs.appendChild(b); };
-  add('＋ツリーを書き込む', () => addInboxTop(null), 'ここに、判断・要件のツリーを直接書きます');
+  add('＋ツリーを書き込む', () => addInboxTop(null), 'ここに、効果・要件のツリーを直接書きます');
   if (canFile && !inboxHandle) add('受け取りファイルを選ぶ', pickInbox, 'フローチャート側が「送信」で書き出したファイル（Googleドライブ内の decision_tree_inbox.json）を選ぶ。選んだあとは「🔄 同期」で自動で読み込まれます');
   add('CSV・受け渡しファイルを取り込む', () => $('#csvIn').click());
   add('受け取り履歴を消す', () => { if (confirm('「受け取り済み」の記録を消します。受け取りファイルの中身は、次回また最初から取り込まれます。よろしいですか？')) { data.seen = {}; changed(); showBanner('受け取り履歴を消しました。'); } });
@@ -2269,7 +2275,7 @@ function fieldInboxSection(ids) {
   h.appendChild(el('b', null, '📥 未接続ツリー（' + ids.length + '件）'));
   const m = mapNodeFor(view.rootId);
   if (m) wireAreaDrop(wrap, m.id);
-  if (m) { const bs = el('span', 'inboxb'), b = el('button', 'sm', '＋ツリーを書き込む'); b.title = 'ここに、判断・要件のツリーを直接書きます'; b.onclick = () => addInboxTop(m.id); bs.appendChild(b); h.appendChild(bs); }
+  if (m) { const bs = el('span', 'inboxb'), b = el('button', 'sm', '＋ツリーを書き込む'); b.title = 'ここに、効果・要件のツリーを直接書きます'; b.onclick = () => addInboxTop(m.id); bs.appendChild(b); h.appendChild(bs); }
   wrap.appendChild(h);
   wrap.appendChild(el('div', 'hint', ids.length
     ? 'ブロックをつかんで、上のツリーの好きな場所に落とすと、つながります（行の上端＝その前／下端＝その後ろ／中央＝その中）。'
@@ -2385,7 +2391,7 @@ function renderPanel() {
   }
   if (isMap) {
     P.appendChild(el('div', 'sec', 'この分野が開くツリー'));
-    P.appendChild(el('div', 'hint', 'クリックしたときにジャンプする先（その分野の最上位の判断）を選びます。分野名だけの見出しにするときは「なし」。'));
+    P.appendChild(el('div', 'hint', 'クリックしたときにジャンプする先（その分野の最上位の効果）を選びます。分野名だけの見出しにするときは「なし」。'));
     const js = el('select'); const j0 = el('option', null, '（なし：見出しだけ）'); j0.value = ''; js.appendChild(j0);
     data.roots.filter(r => data.nodes[r]).forEach(r => { const o = el('option', null, data.nodes[r].title || '（無題）'); o.value = r; if (n.jump === r) o.selected = true; js.appendChild(o); });
     js.onchange = () => { if (js.value) n.jump = js.value; else delete n.jump; changed(); render(); };
@@ -2393,7 +2399,7 @@ function renderPanel() {
     const nb = el('button', 'sm', '新しいツリーを作って、ここにつなぐ');
     nb.style.marginTop = '6px';
     nb.onclick = () => {
-      const rid = uid(); data.nodes[rid] = newNode(rid, (n.title || '新しい分野') + 'の最上位の判断'); data.roots.push(rid); n.jump = rid; changed(); openField(rid);
+      const rid = uid(); data.nodes[rid] = newNode(rid, (n.title || '新しい分野') + 'の最上位の効果'); data.roots.push(rid); n.jump = rid; changed(); openField(rid);
       selKey = rid; editing = true; wantFocus = true; render();
     };
     P.appendChild(nb);
@@ -2617,7 +2623,7 @@ $('#btnRoot').onclick = () => {
     const p = selKey ? data.nodes[selId()] : null;
     if (p) { p.kids.push({ id, role: '?', w: '', tier: '' }); expanded.add(selKey); afterCreate(selKey + '>' + id); }
     else { data.nodes[id].home = true; afterCreate(id); }
-  } else { data.roots.push(id); data.nodes[id].peer = fieldPrimary(view.rootId); afterCreate(id); }   // いま見ている分野の、もう1つの最上位の判断
+  } else { data.roots.push(id); data.nodes[id].peer = fieldPrimary(view.rootId); afterCreate(id); }   // いま見ている分野の、もう1つの最上位の効果
 };
 
 // キーの変更（割り当て待ち）
