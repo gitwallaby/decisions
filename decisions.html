@@ -103,6 +103,9 @@ li.ghead.wg span{background:var(--wgbg);color:var(--wg)}
 .chipb.dragging{opacity:.45}
 .chipb[draggable=true]{cursor:grab}
 .inboxsec.dz-area{outline:2px dashed var(--acc);outline-offset:-2px}
+#trashZone{position:fixed;right:18px;bottom:64px;width:120px;height:92px;border:2px dashed var(--sub);border-radius:12px;background:var(--bg);color:var(--sub);display:none;flex-direction:column;align-items:center;justify-content:center;font-size:13px;z-index:49;text-align:center;line-height:1.4}
+#trashZone .ti{font-size:30px;line-height:1}
+#trashZone.over{border-color:#c0392b;color:#c0392b;background:rgba(192,57,43,.1)}
 #dndHint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:50;display:none;pointer-events:none;max-width:90vw}
 .ttl{font-weight:600}
 .ttl.blank{color:var(--sub);font-weight:400}
@@ -219,7 +222,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611231105</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611232150</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
@@ -247,6 +250,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
   <p><button id="btnClear" class="sm danger">データを全部消して白紙にする</button> <span>（取り消せません。先に「書き出し」をおすすめします）</span></p>
 </details>
 <div id="banner"></div>
+<div id="trashZone"><span class="ti">🗑</span>ここに落とすと<br>削除</div>
 <div id="dndHint"></div>
 <div class="main">
   <section class="pane">
@@ -1614,6 +1618,37 @@ function deleteSelected() {
   });
   selKey = null; editing = false; changed(); render();
 }
+function trashDeletable() {   // いまつかんでいるブロックは、ゴミ箱で消せるか（分野・最上位の枠は消せない）
+  if (!dragSrc || !dragSrc.path) return false;
+  const id = dragSrc.path[dragSrc.path.length - 1], n = data.nodes[id];
+  if (!n || n.home) return false;
+  return dragSrc.path.length >= 2 || !!n.inbox;
+}
+function showTrash(on) { const z = $('#trashZone'); if (!z) return; z.style.display = on ? 'flex' : 'none'; if (!on) z.classList.remove('over'); }
+function dropOnTrash(path) {   // ゴミ箱に落とした：選んで削除（確認の画面は、いつもの削除と同じ。やめたら選択は元に戻す）
+  const before = selKey;
+  selKey = path.join('>');
+  const id = path[path.length - 1], existed = !!data.nodes[id];
+  deleteSelected();
+  if (existed && data.nodes[id]) { selKey = before; render(); }   // 確認でやめたとき
+}
+(function wireTrash() {
+  const z = $('#trashZone'); if (!z) return;
+  document.addEventListener('dragstart', () => { showTrash(trashDeletable()); });
+  document.addEventListener('dragend', () => showTrash(false));
+  z.addEventListener('dragover', e => {
+    if (!trashDeletable()) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move'; z.classList.add('over');
+    dndHint('ここに落とすと、このブロックを削除します（確認の画面が出ます）');
+  });
+  z.addEventListener('dragleave', () => { z.classList.remove('over'); dndHint(''); });
+  z.addEventListener('drop', e => {
+    e.preventDefault(); z.classList.remove('over');
+    if (!trashDeletable()) return;
+    const path = dragSrc.path.slice(); dragSrc = null; dndHint(''); showTrash(false);
+    dropOnTrash(path);
+  });
+})();
 function moveSel(dir) {
   const rows = [...document.querySelectorAll('#tree .row[data-key]:not([data-cyc])')];
   const idx = rows.findIndex(r => r.dataset.key === selKey);
