@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1419">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="body_make">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>body_make ガワ(見た目だけの試作) 版 202611232150</title>
+<style>
+:root{
+  --bg:#0f1419; --card:#18202a; --card2:#1f2a37; --line:#2b3748; --txt:#e8eef5; --sub:#92a3b8;
+  --acc:#4cc9a0; --acc2:#3b82f6; --warn:#f5a524; --bad:#ef5b5b; --ok:#4cc9a0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#000;color:var(--txt);font-family:-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif}
+#app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:78px}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
+header.top h1{font-size:18px;margin:0;display:flex;align-items:center;justify-content:space-between}
+header.top .ver{font-size:10px;color:var(--sub);font-weight:400}
+.banner{background:#3a2f12;color:#ffd98a;font-size:11px;padding:6px 16px;line-height:1.5}
+.screen{display:none;padding:14px 16px}
+.screen.on{display:block}
+h2{font-size:15px;margin:18px 0 8px;color:var(--txt)}
+h2:first-child{margin-top:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sub{color:var(--sub);font-size:12px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 12px;text-align:left;color:var(--txt);font-size:14px;cursor:pointer}
+.tile b{display:block;font-size:15px;margin-bottom:4px}
+.tile span{color:var(--sub);font-size:11px}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--sub);margin-right:4px}
+.badge.star{color:#ffd166;border-color:#6b5a1f}
+.badge.pri{color:var(--acc);border-color:#1f6b53}
+.badge.alt{color:#9ec5ff;border-color:#2c4f87}
+.badge.sp-lo{color:var(--acc);border-color:#1f6b53}
+.badge.sp-mid{color:var(--warn);border-color:#6b5a1f}
+.badge.sp-hi{color:var(--bad);border-color:#7a2d2d}
+button{font:inherit;color:inherit}
+.btn{background:var(--acc);color:#052018;border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:14px;width:100%;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);font-weight:500}
+.btn.sm{width:auto;padding:7px 12px;font-size:12px;border-radius:10px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:44px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:9px 4px;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--acc2);border-color:var(--acc2);color:#fff}
+.sets{display:grid;grid-template-columns:34px 1fr 1fr 40px;gap:6px;align-items:center;margin-top:8px}
+.sets .h{font-size:10px;color:var(--sub);text-align:center}
+.sets input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px 6px;font-size:15px;text-align:center}
+.sets .n{font-size:12px;color:var(--sub);text-align:center}
+.chk{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--acc);font-size:16px;cursor:pointer;justify-self:center}
+.chk.on{background:var(--acc);color:#052018}
+.prev{font-size:11px;color:var(--sub);margin-top:6px}
+.bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--acc2);border-radius:99px}
+.bar.g>i{background:var(--acc)} .bar.w>i{background:var(--warn)} .bar.r>i{background:var(--bad)}
+.mrow{display:grid;grid-template-columns:78px 1fr 40px;gap:8px;align-items:center;font-size:12px;margin:6px 0}
+.mrow.wide{grid-template-columns:96px 1fr 64px}
+.mrow em{font-style:normal;color:var(--sub);text-align:right}
+.flow{border-left:2px solid var(--line);margin-left:6px;padding-left:12px}
+.flow .st{position:relative;margin:0 0 12px;font-size:13px;line-height:1.5}
+.flow .st:before{content:"";position:absolute;left:-18px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--acc2)}
+.flow .st.br:before{background:var(--warn)}
+.flow .st.br{color:#ffd98a}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--sub);font-weight:500}
+nav.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0b0f14;border-top:1px solid var(--line);display:flex;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom button{flex:1;background:none;border:0;padding:9px 0 8px;color:var(--sub);font-size:10px;cursor:pointer}
+nav.bottom button b{display:block;font-size:19px;font-weight:400;margin-bottom:1px}
+nav.bottom button.on{color:var(--acc)}
+.chip{display:inline-block;padding:7px 12px;border-radius:99px;background:var(--card2);border:1px solid var(--line);font-size:12px;margin:0 6px 6px 0;cursor:pointer}
+.chip.add{border-style:dashed;color:var(--acc)}
+.chip small{display:block;color:var(--sub);font-size:10px;margin-top:2px}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.sw{width:42px;height:24px;border-radius:99px;background:var(--card2);border:1px solid var(--line);position:relative;cursor:pointer}
+.sw:after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--sub);transition:.15s}
+.sw.on{background:#1f6b53}.sw.on:after{left:20px;background:var(--acc)}
+.timer{font-size:34px;font-weight:700;text-align:center;letter-spacing:2px;margin:6px 0}
+.note{font-size:11px;color:var(--sub);line-height:1.6}
+.fatigue-num{font-size:30px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1><span id="title">ホーム</span><span class="ver">ガワ 版 202611232150</span></h1>
+  </header>
+  <div class="banner">見た目だけの試作です。ボタンは動かないものが多く、数字はすべてダミーです(実際の記録ではありません)。</div>
+
+  <!-- ホーム -->
+  <section class="screen on" id="home">
+    <div class="card">
+      <div class="row"><div><div class="sub">今日 11/23(月)</div><div style="font-size:17px;font-weight:700;margin-top:2px">水・土メニュー(Aパターン)</div></div>
+      <button class="btn sm" onclick="go('train')">トレを始める</button></div>
+      <div class="sub" style="margin-top:8px">疲労度の目安:<b style="color:var(--warn)"> 中(3)</b> ／ 睡眠 7時間10分(ダミー)</div>
+    </div>
+    <h2>今週のざっくり</h2>
+    <div class="card">
+      <div class="mrow"><span>トレ回数</span><div class="bar"><i style="width:60%"></i></div><em>3/5</em></div>
+      <div class="mrow"><span>ボリューム</span><div class="bar g"><i style="width:72%"></i></div><em>72%</em></div>
+      <div class="mrow"><span>食事の評価</span><div class="bar w"><i style="width:55%"></i></div><em>ふつう</em></div>
+    </div>
+    <h2>画面</h2>
+    <div class="tiles">
+      <button class="tile" onclick="go('train')"><b>今日のトレ入力</b><span>重さ・回数・セット</span></button>
+      <button class="tile" onclick="go('menu')"><b>メニュー・種目</b><span>種目の一覧と筋肉の割合</span></button>
+      <button class="tile" onclick="go('trend')"><b>記録の推移</b><span>重さ・体の数字のグラフ</span></button>
+      <button class="tile" onclick="go('meal')"><b>食事</b><span>カロリー・腹持ち・タンパク質・血糖値</span></button>
+      <button class="tile" onclick="go('fatigue')"><b>疲労管理</b><span>睡眠・HRV・ボリューム</span></button>
+      <button class="tile" onclick="go('goal')"><b>目標・設定</b><span>目標と方針の提案</span></button>
+    </div>
+  </section>
+
+  <!-- 今日のトレ入力 -->
+  <section class="screen" id="train">
+    <div class="card">
+      <div class="row"><b>水・土メニュー</b><span class="seg" style="flex:none"><button class="on" onclick="seg(this)">A週</button><button onclick="seg(this)">B週</button></span></div>
+      <div class="note" style="margin-top:6px">☆つきは3セット、ほかは2セット。5〜7回(低重量・自重は12回前後)で、きつくなる重さにする。きつくなったらやめてOK。</div>
+    </div>
+
+    <h2>筋トレ</h2>
+    <div class="card">
+      <div class="row"><b>ワンハンドラットプル <span class="badge star">☆3セット</span></b></div>
+      <div style="margin-top:4px"><span class="badge pri">優先1</span><span class="badge alt">択一A</span><span class="sub">20kg × 両側</span></div>
+      <div class="prev">前回(11/20): 20kg × 7回 ×3 ／ 目安 5〜7回</div>
+      <div class="sets"><span class="h">セット</span><span class="h">重さ(kg)</span><span class="h">回数</span><span class="h">完了</span>
+        <span class="n">1</span><input value="20" inputmode="decimal"><input value="7" inputmode="numeric"><button class="chk on" onclick="tg(this)">✓</button>
+        <span class="n">2</span><input value="20" inputmode="decimal"><input value="6" inputmode="numeric"><button class="chk" onclick="tg(this)">✓</button>
+        <span class="n">3</span><input placeholder="20" inputmode="decimal"><input placeholder="回" inputmode="numeric"><button class="chk" onclick="tg(this)">✓</button>
+      </div>
+      <div class="note" style="margin-top:8px">器具の設定: プーリー 5番(ダミー) ／ 意識: 肩をすくめない</div>
+    </div>
+    <div class="card">
+      <div class="row"><b>低重量ケーブルサイドレイズ <span class="badge star">☆3セット</span></b></div>
+      <div style="margin-top:4px"><span class="badge alt">択一B</span><span class="sub">3kg × 両側</span></div>
+      <div class="prev">前回(11/20): 3kg × 12回 ×3 ／ 目安 12回前後</div>
+      <div class="sets"><span class="h">セット</span><span class="h">重さ(kg)</span><span class="h">回数</span><span class="h">完了</span>
+        <span class="n">1</span><input placeholder="3" inputmode="decimal"><input placeholder="回" inputmode="numeric"><button class="chk" onclick="tg(this)">✓</button>
+        <span class="n">2</span><input placeholder="3" inputmode="decimal"><input placeholder="回" inputmode="numeric"><button class="chk" onclick="tg(this)">✓</button>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="note">同じ部位の択一: Aを選ぶと、Bは今日は非表示</span><button class="btn ghost sm" onclick="go('menu')">Aに切替</button></div>
+    </div>
+    <div class="card">
+      <div class="row"><b>インクラインスミスマシンプレス</b><span class="badge pri">優先1</span></div>
+      <div class="prev">前回(11/20): 30kg × 6回 ×2 ／ 目安 5〜7回</div>
+      <div class="sets"><span class="h">セット</span><span class="h">重さ(kg)</span><span class="h">回数</span><span class="h">完了</span>
+        <span class="n">1</span><input placeholder="30" inputmode="decimal"><input placeholder="回" inputmode="numeric"><button class="chk" onclick="tg(this)">✓</button>
+        <span class="n">2</span><input placeholder="30" inputmode="decimal"><input placeholder="回" inputmode="numeric"><button class="chk" onclick="tg(this)">✓</button>
+      </div>
+    </div>
+
+    <h2>インターバルタイマー</h2>
+    <div class="card">
+      <div class="timer">01:30</div>
+      <div class="seg"><button onclick="seg(this)">60秒</button><button class="on" onclick="seg(this)">90秒</button><button onclick="seg(this)">120秒</button><button onclick="seg(this)">自由</button></div>
+      <div class="row" style="margin-top:10px;gap:8px"><button class="btn">開始</button><button class="btn ghost">PiP表示</button></div>
+      <div class="note" style="margin-top:6px">※ ピクチャインピクチャとバックグラウンド再生は、見た目だけ。</div>
+    </div>
+
+    <h2>ノルウェー式トレッドミルHIIT</h2>
+    <div class="card">
+      <div class="flow">
+        <div class="st">傾斜なしのZone3〜4でランニング → 心拍170に到達</div>
+        <div class="st">3分 Zone2で休み</div>
+        <div class="st">傾斜10%でノルウェー式(小走り。手すりをつかむ場合は傾斜を2%上げる)<br><span class="sub">1セット目は開始2分で167到達が目標。2セット目以降は開始1分</span></div>
+        <div class="st br">分岐: 前回のHIITがうまくできなかった → オーバーワークの可能性 → 今日はZone2 傾斜10% 45分に変更</div>
+      </div>
+      <div class="row"><span class="sub">前回: うまくできた(ダミー)</span><span class="seg" style="flex:none"><button class="on" onclick="seg(this)">できた</button><button onclick="seg(this)">できなかった</button></span></div>
+    </div>
+
+    <h2>きょうの疲労度</h2>
+    <div class="card"><div class="seg"><button onclick="seg(this)">1</button><button onclick="seg(this)">2</button><button class="on" onclick="seg(this)">3</button><button onclick="seg(this)">4</button><button onclick="seg(this)">5</button></div>
+    <div class="sub" style="margin-top:6px">1=楽 / 5=とても疲れた</div></div>
+    <button class="btn" onclick="go('home')">きょうのトレを保存(見た目だけ)</button>
+  </section>
+
+  <!-- メニュー・種目 -->
+  <section class="screen" id="menu">
+    <h2>メニュー</h2>
+    <div class="card">
+      <div class="seg" style="margin-bottom:8px"><button class="on" onclick="seg(this)">水・土</button><button onclick="seg(this)">日(A)</button><button onclick="seg(this)">日(B)</button><button onclick="seg(this)">火・金</button></div>
+      <div class="sub">優先順位(ドラッグで並べ替え・見た目だけ)</div>
+      <div style="margin-top:8px">
+        <span class="chip">1 ワンハンドラットプル</span><span class="chip">2 パーシャルヘビーサイドレイズ</span><span class="chip">3 ワイドサムアラウンドラットプル</span><span class="chip">4 インクラインスミスプレス</span>
+        <span class="chip add">＋ 種目を足す</span>
+      </div>
+      <div class="note" style="margin-top:6px">択一: 「ワンハンドラットプル」と「ワイドサムアラウンドラットプル」は A(どちらか1つ)／ 「低重量ケーブルサイドレイズ」と「インクラインベンチサイドレイズ」は B</div>
+    </div>
+    <h2>種目ごとの筋肉の割合(任意・自分で調べて入力)</h2>
+    <div class="card">
+      <b>ワンハンドラットプル</b>
+      <div class="mrow"><span>広背筋</span><div class="bar"><i style="width:60%"></i></div><em>60%</em></div>
+      <div class="mrow"><span>大円筋</span><div class="bar"><i style="width:15%"></i></div><em>15%</em></div>
+      <div class="mrow"><span>上腕二頭筋</span><div class="bar"><i style="width:15%"></i></div><em>15%</em></div>
+      <div class="mrow"><span>その他</span><div class="bar"><i style="width:10%"></i></div><em>10%</em></div>
+      <div class="row" style="margin-top:6px"><span class="note">割合は自分で追加・編集できる(種目数も呼び方も自由)。</span><button class="btn ghost sm">編集</button></div>
+    </div>
+    <h2>このメニュー全体で鍛えられる筋肉(ざっくり)</h2>
+    <div class="card">
+      <div class="seg" style="margin-bottom:8px"><button class="on" onclick="seg(this)">1回</button><button onclick="seg(this)">週</button><button onclick="seg(this)">月</button></div>
+      <div class="mrow"><span>広背筋</span><div class="bar g"><i style="width:80%"></i></div><em>80</em></div>
+      <div class="mrow"><span>三角筋(側部)</span><div class="bar g"><i style="width:70%"></i></div><em>70</em></div>
+      <div class="mrow"><span>大胸筋(上部)</span><div class="bar g"><i style="width:45%"></i></div><em>45</em></div>
+      <div class="mrow"><span>上腕二頭筋</span><div class="bar g"><i style="width:30%"></i></div><em>30</em></div>
+      <div class="mrow"><span>脚</span><div class="bar w"><i style="width:8%"></i></div><em>8</em></div>
+      <div class="note" style="margin-top:6px">数字は「セット数×割合」のダミー。単位は適当です。</div>
+    </div>
+  </section>
+
+  <!-- 記録の推移 -->
+  <section class="screen" id="trend">
+    <div class="card">
+      <div class="seg" style="margin-bottom:10px"><button class="on" onclick="seg(this)">種目の重さ</button><button onclick="seg(this)">体の数字</button><button onclick="seg(this)">ボリューム</button></div>
+      <b>ワンハンドラットプル(重さ kg)</b>
+      <svg viewBox="0 0 320 150" width="100%" style="margin-top:8px">
+        <g stroke="#2b3748" stroke-width="1"><line x1="30" y1="20" x2="310" y2="20"/><line x1="30" y1="60" x2="310" y2="60"/><line x1="30" y1="100" x2="310" y2="100"/><line x1="30" y1="135" x2="310" y2="135"/></g>
+        <g fill="#92a3b8" font-size="9"><text x="2" y="23">25</text><text x="2" y="63">22</text><text x="2" y="103">19</text><text x="2" y="138">16</text></g>
+        <polyline fill="none" stroke="#4cc9a0" stroke-width="2.5" points="40,118 85,108 130,100 175,86 220,76 265,58 300,44"/>
+        <g fill="#4cc9a0"><circle cx="40" cy="118" r="3.5"/><circle cx="85" cy="108" r="3.5"/><circle cx="130" cy="100" r="3.5"/><circle cx="175" cy="86" r="3.5"/><circle cx="220" cy="76" r="3.5"/><circle cx="265" cy="58" r="3.5"/><circle cx="300" cy="44" r="3.5"/></g>
+        <g fill="#92a3b8" font-size="9"><text x="30" y="148">9/28</text><text x="120" y="148">10/12</text><text x="210" y="148">10/26</text><text x="285" y="148">11/20</text></g>
+      </svg>
+      <div class="sub">ダミーのグラフです。</div>
+    </div>
+    <h2>体の数字(ダミー)</h2>
+    <div class="card">
+      <table>
+        <tr><th>項目</th><th>前回</th><th>今回</th><th>目標</th></tr>
+        <tr><td>肩囲</td><td>--</td><td>--</td><td>--</td></tr>
+        <tr><td>ウエスト</td><td>--</td><td>--</td><td>--</td></tr>
+        <tr><td>肩幅÷ウエスト</td><td>--</td><td>--</td><td>1.n</td></tr>
+        <tr><td>体重</td><td>--</td><td>--</td><td>--</td></tr>
+      </table>
+      <div class="note" style="margin-top:6px">実際の数字はここには入れていません(見た目だけのため)。</div>
+      <button class="btn ghost" style="margin-top:8px">＋ 計測を入力</button>
+    </div>
+  </section>
+
+  <!-- 食事 -->
+  <section class="screen" id="meal">
+    <div class="card">
+      <div class="row"><b>きょうの残り</b><span class="sub">方針: 減量しながら筋肉も(ダミー)</span></div>
+      <div class="fatigue-num" style="margin-top:6px">840 <span class="sub" style="font-size:13px">kcal 残り</span></div>
+      <div class="bar" style="margin-top:6px"><i style="width:62%"></i></div>
+      <div class="sub" style="margin-top:6px">次の食事の目標: <b style="color:var(--txt)">550〜700 kcal</b></div>
+    </div>
+
+    <h2>きょうの合計(ダミー)</h2>
+    <div class="card">
+      <div class="mrow wide"><span>タンパク質</span><div class="bar g"><i style="width:58%"></i></div><em>70 / 120 g</em></div>
+      <div class="mrow wide"><span>腹持ち</span><div class="bar"><i style="width:65%"></i></div><em>やや良い</em></div>
+      <div class="mrow wide"><span>血糖値スパイク</span><div class="bar w"><i style="width:48%"></i></div><em>ふつう</em></div>
+      <div class="note" style="margin-top:6px">腹持ち = おなかが満たされて続く度合い。血糖値スパイク = 食後に血糖値が急に上がりやすい度合い(低いほどゆるやか)。どちらも食べ物ごとの目安で、1日の平均をざっくり出す想定。</div>
+    </div>
+
+    <h2>よく食べるもの(ワンタップで追加)</h2>
+    <div>
+      <span class="chip">ごはん 1杯 +230<small>タ 4g ／ 腹 ○ ／ 血糖 高め</small></span>
+      <span class="chip">卵 1個 +80<small>タ 6g ／ 腹 ◎ ／ 血糖 低い</small></span>
+      <span class="chip">プロテイン +110<small>タ 22g ／ 腹 △ ／ 血糖 低い</small></span>
+      <span class="chip">鶏むね 1枚 +230<small>タ 45g ／ 腹 ◎ ／ 血糖 低い</small></span>
+      <span class="chip">バナナ +90<small>タ 1g ／ 腹 ○ ／ 血糖 ふつう</small></span>
+      <span class="chip add">＋ 登録</span>
+    </div>
+    <div class="note">(タ = タンパク質、腹 = 腹持ち、血糖 = 血糖値スパイクの起きやすさ。数字はダミー)</div>
+
+    <h2>きょうの記録</h2>
+    <div class="card">
+      <table>
+        <tr><th>時間</th><th>内容</th><th>kcal</th><th>タ(g)</th><th>腹持ち</th><th>血糖</th></tr>
+        <tr><td>朝</td><td>卵・ごはん・プロテイン</td><td>420</td><td>32</td><td>○</td><td><span class="badge sp-mid">ふつう</span></td></tr>
+        <tr><td>昼</td><td>定食</td><td>780</td><td>38</td><td>◎</td><td><span class="badge sp-hi">高め</span></td></tr>
+      </table>
+      <div class="note" style="margin-top:6px">食べ過ぎ度合い(3段階)も記録できる想定: 朝=ちょうど、昼=やや多い。</div>
+    </div>
+    <div class="card">
+      <b>AIに聞く文を作る</b>
+      <div class="note" style="margin:6px 0">食べたものを入れて押すと、カロリー・タンパク質・腹持ち・血糖値スパイクの目安を頼む文を作ってコピーします(見た目だけ)。</div>
+      <div class="sets" style="grid-template-columns:1fr"><input placeholder="例: 牛丼並盛とみそ汁"></div>
+      <div class="row" style="margin-top:8px;gap:8px"><button class="btn">文を作ってコピー</button><button class="btn ghost">AIを開く</button></div>
+    </div>
+    <h2>方針(目標カロリーが変わる)</h2>
+    <div class="seg"><button onclick="seg(this)">増量</button><button onclick="seg(this)">減量</button><button class="on" onclick="seg(this)">減量+筋肉</button><button onclick="seg(this)">維持</button></div>
+  </section>
+
+  <!-- 疲労管理 -->
+  <section class="screen" id="fatigue">
+    <div class="card">
+      <div class="row"><b>きょうの回復度(ダミー)</b><span class="badge pri">ウォッチ連携は未調査</span></div>
+      <div class="fatigue-num" style="margin-top:4px;color:var(--warn)">62 <span class="sub" style="font-size:13px">/ 100</span></div>
+      <div class="note">睡眠・HRV(心拍のゆらぎ)・前日までのボリュームから出す想定。ガーミンなどのデータを取れるかは、あとで調べます。</div>
+    </div>
+    <div class="card">
+      <div class="mrow"><span>睡眠</span><div class="bar g"><i style="width:84%"></i></div><em>7h10</em></div>
+      <div class="mrow"><span>HRV</span><div class="bar w"><i style="width:58%"></i></div><em>52</em></div>
+      <div class="mrow"><span>安静時心拍</span><div class="bar g"><i style="width:70%"></i></div><em>50</em></div>
+    </div>
+    <h2>ボリューム(週・月)</h2>
+    <div class="card">
+      <div class="seg" style="margin-bottom:8px"><button onclick="seg(this)">1回</button><button class="on" onclick="seg(this)">週</button><button onclick="seg(this)">月</button></div>
+      <svg viewBox="0 0 320 120" width="100%">
+        <g fill="#3b82f6"><rect x="24" y="60" width="30" height="50" rx="4"/><rect x="74" y="40" width="30" height="70" rx="4"/><rect x="124" y="30" width="30" height="80" rx="4"/><rect x="174" y="52" width="30" height="58" rx="4"/><rect x="224" y="20" width="30" height="90" rx="4" fill="#f5a524"/><rect x="274" y="70" width="30" height="40" rx="4" opacity=".5"/></g>
+        <g fill="#92a3b8" font-size="9" text-anchor="middle"><text x="39" y="118">9週前</text><text x="89" y="118">5週前</text><text x="139" y="118">4週前</text><text x="189" y="118">3週前</text><text x="239" y="118">先週</text><text x="289" y="118">今週</text></g>
+      </svg>
+      <div class="note">先週は多め(オレンジ)。今週は少なめなので、回復を優先してよい(ダミー)。</div>
+    </div>
+    <h2>疲労が高い日の縮小メニュー</h2>
+    <div class="card">
+      <div class="toggle"><span>疲労度4以上の日は、縮小版を自動で出す</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="toggle"><span>HIITがうまくできなかった次回は、Zone2に変える</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="note" style="margin-top:6px">縮小版 = 全セットを1つ減らす / HIITをZone2 45分にする(ダミーの規則)。</div>
+    </div>
+  </section>
+
+  <!-- 目標・設定 -->
+  <section class="screen" id="goal">
+    <h2>目標</h2>
+    <div class="card">
+      <div class="note" style="margin-bottom:6px">近いものを選ぶと、使える時間に合わせた「方針」を出します(具体的な種目のメニューは組みません)。</div>
+      <span class="chip on">きれいな体型</span><span class="chip">高くジャンプ</span><span class="chip">速く走る</span><span class="chip">体幹・バランス</span><span class="chip">姿勢</span><span class="chip">柔軟性</span><span class="chip">疲れにくい体</span><span class="chip">全身ムキムキ</span>
+    </div>
+    <div class="card">
+      <div class="row"><b>使える時間</b><span class="sub">1週間あたり</span></div>
+      <div class="seg" style="margin-top:8px"><button onclick="seg(this)">少ない</button><button class="on" onclick="seg(this)">ふつう</button><button onclick="seg(this)">多い</button></div>
+    </div>
+    <h2>方針の提案(ダミー)</h2>
+    <div class="card">
+      <b>まずフレームを作る</b>
+      <div class="flow" style="margin-top:8px">
+        <div class="st">忙しい時期: 肩と背中(できれば胸の上部も)に集中してフレームを作る</div>
+        <div class="st">あとから細かい部位(ディテール)を埋める</div>
+        <div class="st">指標: 肩幅 ÷ ウエスト の比率を目標にして、定期的に計測する</div>
+      </div>
+      <div class="row" style="margin-top:6px;gap:8px"><button class="btn">AIに相談する文を作る</button></div>
+    </div>
+    <div class="card">
+      <b>「高くジャンプしたい」を選んだ場合(例)</b>
+      <div class="flow" style="margin-top:8px">
+        <div class="st">プライオメトリクスとスクワット中心(ケガ予防の種目も入れる)</div>
+        <div class="st">場合によっては体重を落とす</div>
+        <div class="st">最初の目標: スクワットを体重の1.5倍にする</div>
+      </div>
+    </div>
+    <h2>設定</h2>
+    <div class="card">
+      <div class="toggle"><span>ガーミン等のデータ連携</span><span class="sub">未調査</span></div>
+      <div class="toggle"><span>タイマーをバックグラウンドで鳴らす</span><div class="sw" onclick="this.classList.toggle('on')"></div></div>
+      <div class="toggle"><span>体の数字を端末の外に出さない</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="toggle"><span>データの置き場</span><span class="sub">Googleスプレッドシート</span></div>
+    </div>
+  </section>
+
+  <nav class="bottom">
+    <button data-s="home" class="on" onclick="go('home')"><b>⌂</b>ホーム</button>
+    <button data-s="train" onclick="go('train')"><b>＋</b>トレ入力</button>
+    <button data-s="trend" onclick="go('trend')"><b>↗</b>推移</button>
+    <button data-s="meal" onclick="go('meal')"><b>◍</b>食事</button>
+    <button data-s="fatigue" onclick="go('fatigue')"><b>♡</b>疲労</button>
+  </nav>
+</div>
+<script>
+var T={home:"ホーム",train:"今日のトレ入力",menu:"メニュー・種目",trend:"記録の推移",meal:"食事",fatigue:"疲労管理",goal:"目標・設定"};
+function go(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('on',s.id===id)});
+  document.querySelectorAll('nav.bottom button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-s')===id)});
+  document.getElementById('title').textContent=T[id];
+  window.scrollTo(0,0);
+}
+function seg(b){var p=b.parentNode;p.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on')}
+function tg(b){b.classList.toggle('on')}
+document.querySelectorAll('.chip:not(.add)').forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on');c.style.borderColor=c.classList.contains('on')?'#4cc9a0':''})});
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+</script>
+</body>
+</html>
