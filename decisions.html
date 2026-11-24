@@ -118,6 +118,9 @@ li.ghead.wg span{background:var(--wgbg);color:var(--wg)}
 .badge.wg{background:var(--wgbg);color:var(--wg)}
 .badge.tier{background:rgba(127,127,127,.18);color:var(--fg)}
 .badge.int{border:1px solid #3a8a8a;color:#2a7a7a;background:none}
+.badge.impA{background:#c0392b;color:#fff}
+.badge.impB{background:#d68910;color:#fff}
+.badge.impC{background:none;border:1px solid var(--sub);color:var(--sub);opacity:.6;font-weight:400}
 .badge.unset{border:1px dashed var(--sub);color:var(--sub);background:none}
 .cnt{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:0 6px;white-space:nowrap}
 .cnt.open{opacity:.55}
@@ -222,7 +225,7 @@ dialog h3{margin:0 0 6px;font-size:16px}
 </head>
 <body>
 <header>
-  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611232150</span></h1>
+  <h1>判断ロジックツリー <span class="shared" style="font-weight:400">版 202611241435</span></h1>
   <span id="status" class="chip st warn" title="書いた内容は、このブラウザの中（またはあなたが選んだデータファイル）にだけ保存され、公開されません">起動中…</span>
   <div class="btns">
     <button id="btnImpFile" class="primary" title="データの保存先ファイル（Googleドライブの decision_tree.json など）を選んで、中身をこの画面に読み込みます。いま画面にあるサンプルは置き換わります">📂 保存先からデータをインポート</button>
@@ -345,6 +348,7 @@ function normalize(d) {
     if (n.home === true) out.nodes[id].home = true;
     if (n.inbox === true) out.nodes[id].inbox = true;
     if (n.grp === true) out.nodes[id].grp = true;
+    if (n.imp === 'A' || n.imp === 'B' || n.imp === 'C') out.nodes[id].imp = n.imp;   // 重要度（試験・実務での重要さ。空もあり）
     if (Array.isArray(n.psid)) { const ps = n.psid.filter(x => typeof x === 'string' && x).slice(0, 50); if (ps.length) out.nodes[id].psid = ps; }
     ['tag', 'fld', 'src', 'sid', 'ssrc', 'prev', 'ptarget', 'kind'].forEach(k => { if (typeof n[k] === 'string' && n[k]) out.nodes[id][k] = n[k]; });
   }
@@ -1004,12 +1008,12 @@ function importFile(f) {
 }
 
 /* ---------- CSV・受け渡しファイル・暫定の置き場 ---------- */
-const CSV_HEAD = ['id', '親', '名前', '位置づけ', '組み方', 'ウェイト', '優先度', '趣旨', '具体例', '分野', 'タグ', '出典', '枠組み'];
+const CSV_HEAD = ['id', '親', '名前', '位置づけ', '組み方', 'ウェイト', '優先度', '趣旨', '具体例', '分野', 'タグ', '出典', '枠組み', '重要度'];
 const HEAD_ALIAS = {
   id: 'id', ID: 'id', '親': 'parent', parent: 'parent', '親id': 'parent', '名前': 'title', title: 'title',
   '位置づけ': 'role', role: 'role', '組み方': 'mode', mode: 'mode', 'ウェイト': 'weight', weight: 'weight', '優先度': 'tier', tier: 'tier',
   '趣旨': 'purpose', purpose: 'purpose', text: 'purpose', '具体例': 'examples', examples: 'examples', '分野': 'field', field: 'field',
-  'タグ': 'tag', tag: 'tag', group: 'group', order: 'order', '出典': 'ref', ref: 'ref', '枠組み': 'frames', frames: 'frames',
+  'タグ': 'tag', tag: 'tag', group: 'group', order: 'order', '出典': 'ref', ref: 'ref', '枠組み': 'frames', frames: 'frames', '重要度': 'imp', imp: 'imp',
 };
 const NID = (() => { let c = 0; return () => uid() + (c++).toString(36); })();
 
@@ -1045,6 +1049,7 @@ const roleName = l => (!l ? '' : l.role === 'exc' ? 'ただし' : l.role === '?'
 const modeName = m => (m === 'or' ? 'どれか' : m === 'weigh' ? '総合考慮' : 'すべて');
 const modeFrom = v => (/^(or|どれか|いずれか)/.test(v || '') ? 'or' : /^(weigh|総合)/.test(v || '') ? 'weigh' : 'and');
 const roleFrom = v => (/^(exc|ただし|例外)/.test(v || '') ? 'exc' : /^(\?|未設定)/.test(v || '') ? '?' : 'req');
+const impFrom = v => { const t = String(v || '').normalize('NFKC').replace(/^重要度/, '').trim().charAt(0).toUpperCase(); return (t === 'A' || t === 'B' || t === 'C') ? t : ''; };
 const tierFrom = v => { const t = (v || '').replace(/的$/, ''); return TIERS.includes(t) ? t : ''; };
 const csvCell = v => { v = v == null ? '' : String(v); return /[",\n\r\t]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
 
@@ -1053,10 +1058,10 @@ function buildRows(rootIds) {
   const fieldOf = rid => { const m = mapNodeFor(rid); if (!m) return ''; const p = findPath(m.id) || []; return p.slice(1).map(i => data.nodes[i].title || '').join('/'); };
   const walk = (id, parentId, link, path) => {
     const n = data.nodes[id]; if (!n || path.includes(id)) return;
-    if (done.has(id)) { rows.push([id, parentId, '', roleName(link), '', link.w || '', link.tier || '', '', '', '', '', '', '']); return; }   // 同じブロックを別の場所にも置く行
+    if (done.has(id)) { rows.push([id, parentId, '', roleName(link), '', link.w || '', link.tier || '', '', '', '', '', '', '', '']); return; }   // 同じブロックを別の場所にも置く行
     done.add(id);
     rows.push([id, parentId, n.title, parentId ? roleName(link) : '', n.kids.length ? modeName(n.mode) : '', link ? link.w || '' : '', link ? link.tier || '' : '',
-      n.purpose, n.examples, parentId ? '' : fieldOf(id), n.tag || '', n.src || '', (n.frames || []).filter(f => data.nodes[f]).join('|')]);
+      n.purpose, n.examples, parentId ? '' : fieldOf(id), n.tag || '', n.src || '', (n.frames || []).filter(f => data.nodes[f]).join('|'), n.imp || '']);
     n.kids.forEach(k => walk(k.id, id, k, path.concat(id)));
   };
   rootIds.forEach(r => walk(r, '', null, []));
@@ -1095,6 +1100,7 @@ function ingestRows(rows, source) {
     if (r.tag && !(r.tag === '要件' && r._v2)) n.tag = r.tag.slice(0, 20);
     if (r.tag) n.kind = r.tag.slice(0, 20);
     if (r.group === 'true') { n.grp = true; if (!n.title) n.title = '（括弧）'; }
+    if (r.imp) { const iv = impFrom(r.imp); if (iv) n.imp = iv; }
     if (r.field) n.fld = r.field.slice(0, 120);
     if (r.ref) n.src = r.ref.slice(0, 200);
     if (source && r._hasId) { n.sid = r.id.slice(0, 120); n.ssrc = source.slice(0, 60); }
@@ -1393,6 +1399,7 @@ id        : 行の目印（a, b, c や 1, 2, 3 など、そのファイルの中
 タグ      : 要件 / 規範 / 趣旨 のどれか（なければ空欄）。「趣旨」とした行は、ブロックを作らず、親の趣旨に文章を足す。
 出典      : 出どころのメモ（論証集B-23、百選〇〇 など）。
 枠組み    : （使うときだけ）重ねたい枠組みブロックの id。複数は | で区切る。
+重要度    : A / B / C（なければ空欄）。A＝予備試験の論文で繰り返し問われ、書かないと評価が下がる／実務で頻出、B＝ときどき出る、C＝条文や学説にはあるが、出題も実務も稀。Cは、独立したブロックにせず、親の趣旨に1行で書くだけでもよい。
 
 ■ 書き方のコツ（データをきれいに作る）
 1. 上から下へ、「効果（結論）→ 要件 → 下位要件」の順に並べ、親の列でつなぐ。
@@ -1974,6 +1981,7 @@ function nodeLi(id, link, path, bi) {
     hl(t, n.title || '（無題）', searchQ); row.appendChild(t);
   }
   if (n.grp) row.appendChild(el('span', 'badge or', '括弧'));
+  if (n.imp) { const ib = el('span', 'badge imp' + n.imp, '重要度' + n.imp); ib.title = n.imp === 'A' ? '重要度A：予備試験の論文で繰り返し問われ、書かないと評価が下がる／実務で頻出' : n.imp === 'B' ? '重要度B：ときどき出る' : '重要度C：条文や学説にはあるが、出題も実務も稀'; row.appendChild(ib); }
   if (n.tag) row.appendChild(el('span', 'badge ' + (n.tag === '趣旨' ? 'or' : n.tag === '規範' ? 'wg' : 'req'), n.tag));
   if (n.fld) row.appendChild(el('span', 'cnt', n.fld));
   if (n.src) row.title = '出どころ：' + n.src;
@@ -2174,6 +2182,12 @@ function makeDetail(id, path) {
       head.appendChild(t);
     }
   }
+  head.appendChild(el('span', 'lab', '重要度'));
+  const iv = el('select'); iv.title = 'A：繰り返し問われ、書かないと下がる／実務で頻出　B：ときどき出る　C：稀';
+  [['', '未設定'], ['A', 'A（最重要）'], ['B', 'B（ときどき）'], ['C', 'C（稀）']].forEach(([v, tx]) => { const o = el('option', null, tx); o.value = v; if ((n.imp || '') === v) o.selected = true; iv.appendChild(o); });
+  iv.onchange = () => { if (iv.value) n.imp = iv.value; else delete n.imp; changed(); renderTree(); };
+  iv.onclick = e => e.stopPropagation();
+  head.appendChild(iv);
   box.appendChild(head);
   const ms = makeMapSection(id, path); if (ms) box.appendChild(ms);
   SECTIONS.forEach(([key, label, hint]) => {
